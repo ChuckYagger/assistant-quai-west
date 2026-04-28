@@ -30,7 +30,6 @@ const projectOptions = [
   { value: "carrosserie", label: "Peinture carrosserie" },
   { value: "bois", label: "Bois, terrasse, sol ou peinture intérieure" },
   { value: "stratification", label: "Stratification / étanchéité" },
-  { value: "inconnu", label: "Je ne sais pas" },
 ];
 
 const baseQuestions = [
