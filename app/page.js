@@ -169,10 +169,13 @@ function getQuestions(answers) {
     filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
   }
 
-  if (answers.project === "piscine") {
-    filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
-  }
-
+ if (answers.project === "piscine") {
+  return [
+    { key: "project", ...baseQuestions.find(q => q.key === "project") },
+    specificQuestions.piscine[0], // forme
+    specificQuestions.piscine[1]  // dimensions
+  ];
+}
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
 
