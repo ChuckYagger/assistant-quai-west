@@ -284,7 +284,22 @@ export default function Home() {
   }
 
   if (!started) {
-    return (
+   return (
+  <>
+    <form name="diagnostic-quai-west" data-netlify="true" hidden>
+      <input type="hidden" name="form-name" value="diagnostic-quai-west" />
+      <input name="marque" />
+      <input name="projet" />
+      <input name="surface" />
+      <input name="produit_recommande" />
+      <input name="prenom" />
+      <input name="email" />
+      <input name="telephone" />
+      <textarea name="commentaire"></textarea>
+      <input name="optin" />
+    </form>
+
+    <main className="page">
       <main className="page">
         <section className="hero">
           <div className="badge">Assistant technique Quai West</div>
@@ -301,6 +316,7 @@ export default function Home() {
           <div className="trust"><span>✓ Calcul quantité</span><span>✓ Panier conseillé</span><span>✓ Erreurs à éviter</span></div>
         </section>
       </main>
+  </>
     );
   }
 
