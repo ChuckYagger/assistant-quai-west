@@ -1,99 +1,791 @@
-
 "use client";
-import { useState } from "react";
 
-const projects = [
-  {v:"bateau",l:"Réparation bateau"},
-  {v:"surf",l:"Réparation surf"},
-  {v:"moulage",l:"Moulage pièce"},
-  {v:"carrosserie",l:"Peinture carrosserie"},
-  {v:"bois",l:"Bois / Terrasse"},
-  {v:"piscine",l:"Stratification piscine"}
+import { useMemo, useState } from "react";
+
+const productLinks = {
+  boutique: "https://boutique.quai-west-composites.fr",
+  polyester: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+polyester",
+  epoxy: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+epoxy",
+  gelcoat: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=gelcoat",
+  silicone: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=silicone+moulage",
+  peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
+
+  kormatekHome: "https://www.kormatek-boisetdeco.fr/",
+  kormatekExterior: "https://www.kormatek-boisetdeco.fr/11-protection-du-bois-exterieur",
+  kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
+  kormatekTreolje: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
+  kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
+  kormatekPanelakk: "https://www.kormatek-boisetdeco.fr/protection-du-bois-interieur/25-panelakk-7029350139577.html",
+  kormatekVeggTag: "https://www.kormatek-boisetdeco.fr/peinture-interieure-decorative/23-vegg-tag-05-7029350008156.html",
+  kormatekGulvmaling: "https://www.kormatek-boisetdeco.fr/peintures-pour-sol-interieur/39-trestjerner-gulvmaling-7031157802370.html",
+  kormatekBetongolje: "https://www.kormatek-boisetdeco.fr/peintures-pour-sol-interieur/37-trestjerner-betongolje-7031157801748.html",
+  kormatekGulvlakk: "https://www.kormatek-boisetdeco.fr/peintures-pour-sol-interieur/44-trestjerner-gulvlakk-.html",
+  kormatekAccessories: "https://www.kormatek-boisetdeco.fr/15-accessoires"
+};
+
+const projectOptions = [
+  { value: "bateau", label: "Réparation bateau / coque" },
+  { value: "surf", label: "Réparation planche de surf" },
+  { value: "moulage", label: "Moulage / fabrication de pièce" },
+  { value: "carrosserie", label: "Peinture carrosserie" },
+  { value: "bois", label: "Bois, terrasse, sol ou peinture intérieure" },
+  { value: "piscine", label: "Remplacer un liner piscine par stratification polyester" },
+  { value: "stratification", label: "Stratification / étanchéité" },
 ];
 
-export default function Home(){
+const baseQuestions = [
+  { key: "project", title: "Quel est votre projet principal ?", type: "cards", options: projectOptions },
+  { key: "level", title: "Quel est votre niveau ?", type: "cards", options: [
+    { value: "debutant", label: "Débutant" },
+    { value: "confirme", label: "Bricoleur confirmé" },
+    { value: "pro", label: "Professionnel" }
+  ]},
+  { key: "surface", title: "Quelle surface souhaitez-vous traiter ?", type: "surface" },
+  { key: "support", title: "Quel est le support principal ?", type: "cards", skipFor: ["bois"], options: [
+    { value: "polyester", label: "Polyester" },
+    { value: "epoxy", label: "Époxy" },
+    { value: "bois", label: "Bois" },
+    { value: "metal", label: "Métal" },
+    { value: "plastique", label: "Plastique" },
+    { value: "ancienne-peinture", label: "Ancienne peinture" },
+    { value: "inconnu", label: "Je ne sais pas" }
+  ]},
+  { key: "goal", title: "Quel résultat souhaitez-vous obtenir ?", type: "cards", options: [
+    { value: "reparer", label: "Réparer" },
+    { value: "renforcer", label: "Renforcer" },
+    { value: "proteger", label: "Protéger" },
+    { value: "peindre", label: "Peindre" },
+    { value: "etancher", label: "Étancher" },
+    { value: "finition", label: "Finition esthétique" }
+  ]},
+  { key: "priority", title: "Quelle est votre priorité ?", type: "cards", options: [
+    { value: "simple", label: "Solution simple" },
+    { value: "resistance", label: "Résistance maximale" },
+    { value: "finition", label: "Belle finition" },
+    { value: "prix", label: "Prix maîtrisé" },
+    { value: "rapidite", label: "Rapidité d’application" },
+    { value: "conseil", label: "Conseil technique" }
+  ]}
+];
 
-const [step,setStep]=useState(0);
-const [answers,setAnswers]=useState({});
-const [status,setStatus]=useState("");
+const specificQuestions = {
+  bateau: [
+    { key: "boatIssue", title: "Votre réparation concerne :", type: "cards", options: [
+      { value: "fissure", label: "Petite fissure" },
+      { value: "trou", label: "Trou / impact" },
+      { value: "fragilisee", label: "Zone fragilisée" },
+      { value: "gelcoat", label: "Reprise de gelcoat" },
+      { value: "complete", label: "Stratification complète" }
+    ]}
+  ],
+  surf: [
+    { key: "surfBoard", title: "Votre planche est :", type: "cards", options: [
+      { value: "polyester", label: "Polyester" },
+      { value: "epoxy-eps", label: "Époxy / EPS" },
+      { value: "inconnu", label: "Je ne sais pas" }
+    ]},
+    { key: "surfIssue", title: "Type de dommage :", type: "cards", options: [
+      { value: "pet", label: "Petit pet" },
+      { value: "fissure", label: "Fissure" },
+      { value: "trou", label: "Trou" },
+      { value: "delamination", label: "Délamination" },
+      { value: "zone-molle", label: "Zone molle" }
+    ]}
+  ],
+  moulage: [
+    { key: "moldingNeed", title: "Que souhaitez-vous faire ?", type: "cards", options: [
+      { value: "reproduction-petite-piece", label: "Reproduire un petit objet" },
+      { value: "moule-souple", label: "Fabriquer un moule souple" },
+      { value: "tirage", label: "Tirer une pièce dans un moule" },
+      { value: "coulee", label: "Faire une coulée / inclusion" },
+      { value: "technique", label: "Fabriquer une pièce technique" },
+      { value: "decoratif", label: "Créer un objet décoratif" }
+    ]},
+    { key: "dimensions", title: "Quelle est la taille de votre objet ?", type: "dimensions" }
+  ],
+  carrosserie: [
+    { key: "finish", title: "Finition souhaitée :", type: "cards", options: [
+      { value: "brillant-direct", label: "Brillant direct" },
+      { value: "base-vernis", label: "Base mate + vernis" },
+      { value: "metalisee", label: "Métallisée" },
+      { value: "ral", label: "RAL couleur unie" },
+      { value: "inconnu", label: "Je ne sais pas" }
+    ]}
+  ],
+  bois: [
+    { key: "kormatekProject", title: "Quel type de projet Kormatek souhaitez-vous réaliser ?", type: "cards", options: [
+      { value: "terrasse-exterieure", label: "Terrasse bois extérieure" },
+      { value: "bois-exterieur", label: "Bardage, menuiserie ou bois extérieur" },
+      { value: "bois-interieur-transparent", label: "Bois intérieur transparent / lasure" },
+      { value: "peinture-interieure", label: "Peinture décorative intérieure murs/plafonds" },
+      { value: "sol-bois-transparent", label: "Sol intérieur bois transparent / vernis" },
+      { value: "sol-interieur-opaque", label: "Sol intérieur opaque bois ou béton" },
+      { value: "sol-beton-transparent", label: "Sol béton transparent / anti-poussière" }
+    ]},
+    { key: "kormatekState", title: "Quel est l’état du support ?", type: "cards", options: [
+      { value: "neuf", label: "Neuf ou brut" },
+      { value: "grise", label: "Grisé / terni" },
+      { value: "sale", label: "Sale / taché / noirci" },
+      { value: "ancienne-lasure", label: "Ancienne lasure" },
+      { value: "ancienne-peinture", label: "Ancienne peinture" },
+      { value: "ancien-vernis", label: "Ancien vernis" },
+      { value: "poussiereux", label: "Béton poreux / poussiéreux" }
+    ]},
+    { key: "kormatekFinish", title: "Quel rendu souhaitez-vous ?", type: "cards", options: [
+      { value: "naturel", label: "Aspect naturel" },
+      { value: "transparent", label: "Transparent / incolore" },
+      { value: "teinte", label: "Teinté" },
+      { value: "opaque", label: "Opaque / couvrant" },
+      { value: "mat", label: "Mat décoratif" },
+      { value: "resistance-sol", label: "Résistance au passage" }
+    ]}
+  ],
+  piscine: [
+    { key: "poolShape", title: "Quelle est la forme de votre piscine ou bassin ?", type: "cards", options: [
+      { value: "rectangulaire", label: "Rectangulaire" },
+      { value: "carree", label: "Carrée" },
+      { value: "ronde", label: "Ronde" },
+      { value: "ovale", label: "Ovale" },
+      { value: "haricot", label: "Haricot / forme libre" },
+      { value: "l", label: "En L" },
+      { value: "couloir", label: "Couloir de nage" }
+    ]},
+    { key: "poolDimensions", title: "Indiquez les dimensions de votre piscine", type: "poolDimensions" }
+  ],
+  stratification: []
+};
 
-function set(k,v){setAnswers({...answers,[k]:v});setStep(step+1);}
+function getQuestions(answers) {
+  let filteredBase = baseQuestions
+    .filter(q => !(q.skipFor || []).includes(answers.project))
+    .map(q => {
+      if (q.key === "goal" && answers.project === "carrosserie") {
+        return {
+          ...q,
+          options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value))
+        };
+      }
+      return q;
+    });
 
-function calcPiscine(){
-  const L=+answers.L||0,W=+answers.W||0,H=+answers.H||0;
-  return (L*W)+(2*L*H)+(2*W*H);
+  if (answers.project === "moulage") {
+    filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
+  }
+
+  return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
 
-function estimate(){
-  const s=answers.surface||calcPiscine()||1;
-  return Math.round(s*12);
+function labelFor(questionKey, value) {
+  const all = [...baseQuestions, ...Object.values(specificQuestions).flat()];
+  const q = all.find(item => item.key === questionKey);
+  if (!q || !q.options) return value || "Non renseigné";
+  return q.options.find(opt => opt.value === value)?.label || value || "Non renseigné";
 }
 
-async function submit(e){
- e.preventDefault();
- const data=new URLSearchParams({
-   "form-name":"diagnostic-quai-west",
-   ...answers,
-   prix:estimate()
- });
- await fetch("/forms.html",{method:"POST",body:data});
- setStatus("Envoyé");
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 }
 
-return (
-<div style={{padding:30}}>
 
-<div style={{marginBottom:10,fontWeight:"bold"}}>
-{Object.values(answers).join(" → ")}
-</div>
+function getObjectVolumeLiters(answers) {
+  const l = parseFloat(String(answers.objectLength || "0").replace(",", ".")) || 0;
+  const w = parseFloat(String(answers.objectWidth || "0").replace(",", ".")) || 0;
+  const h = parseFloat(String(answers.objectHeight || "0").replace(",", ".")) || 0;
+  return (l * w * h) / 1000;
+}
 
-{step===0 && projects.map(p=>(
-<button key={p.v} onClick={()=>set("project",p.v)}>{p.l}</button>
-))}
+function getPoolSurface(answers) {
+  const length = parseFloat(String(answers.poolLength || "0").replace(",", ".")) || 0;
+  const width = parseFloat(String(answers.poolWidth || "0").replace(",", ".")) || 0;
+  const depth = parseFloat(String(answers.poolDepth || "0").replace(",", ".")) || 0;
+  const shape = answers.poolShape || "rectangulaire";
 
-{step===1 && (
-<>
-<button onClick={()=>set("level","Débutant")}>Débutant</button>
-<button onClick={()=>set("level","Pro")}>Pro</button>
-</>
-)}
+  let floor = length * width;
 
-{step===2 && answers.project==="moulage" && (
-<>
-<input placeholder="Longueur" onChange={e=>set("L",e.target.value)}/>
-<input placeholder="Largeur" onChange={e=>set("W",e.target.value)}/>
-<input placeholder="Hauteur" onChange={e=>set("H",e.target.value)}/>
-<button onClick={()=>setStep(6)}>Calcul</button>
-</>
-)}
+  if (shape === "ronde") {
+    const radius = width / 2;
+    floor = Math.PI * radius * radius;
+  }
 
-{step===2 && answers.project!=="moulage" && (
-<>
-<input placeholder="Surface m2" onChange={e=>set("surface",e.target.value)}/>
-<button onClick={()=>setStep(6)}>Calcul</button>
-</>
-)}
+  if (shape === "ovale") {
+    floor = Math.PI * (length / 2) * (width / 2);
+  }
 
-{step===6 && (
-<>
-<h2>Résultat</h2>
-<p>Surface : {answers.surface || calcPiscine()} m²</p>
-<p>Prix estimé : {estimate()} €</p>
+  if (shape === "haricot") {
+    floor = length * width * 0.8;
+  }
 
-{answers.project==="moulage" && (answers.L*answers.W*answers.H<5000) && (
-<p>👉 Conseil : utiliser silicone RTV</p>
-)}
+  if (shape === "l") {
+    floor = length * width * 0.75;
+  }
 
-<form onSubmit={submit}>
-<input name="prenom" placeholder="Prénom"/>
-<input name="email" placeholder="Email"/>
-<button type="submit">Envoyer</button>
-</form>
+  const perimeter = shape === "ronde"
+    ? Math.PI * width
+    : shape === "ovale"
+      ? Math.PI * (3 * (length / 2 + width / 2) - Math.sqrt((3 * length / 2 + width / 2) * (length / 2 + 3 * width / 2)))
+      : 2 * (length + width);
 
-<p>{status}</p>
-</>
-)}
+  const walls = perimeter * depth;
+  return Math.max((floor + walls) * 1.08, 0);
+}
 
-</div>
-);
+function getPoolMaterials(surface) {
+  const s = Math.max(surface, 1);
+  return [
+    `Résine polyester : environ ${formatNumber(s * 1.2)} kg`,
+    `Catalyseur PMEC : environ ${formatNumber(s * 1.2 * 1000 * 0.02)} g à 2 %`,
+    `Mat de verre : environ ${formatNumber(s * 2)} m² pour 2 couches`,
+    `Gelcoat / topcoat piscine : environ ${formatNumber(s * 0.6)} kg`,
+    `Acétone / nettoyant : prévoir selon préparation du support`,
+    `Rouleaux débulleurs, pinceaux, rouleaux, gants, seaux de mélange`,
+    `Abrasifs et matériel de ponçage pour préparation du béton`
+  ];
+}
+
+function recommend(answers) {
+  const surface = Math.max(parseFloat(String(answers.surface || "1").replace(",", ".")) || 1, 0.1);
+  let title = "Diagnostic technique personnalisé";
+  let product = "Sélection technique";
+  let categoryUrl = productLinks.boutique;
+  let explanation = "Votre projet nécessite une sélection compatible entre le support, le résultat attendu et les conditions d’application.";
+  let products = ["Produit principal adapté", "Accessoires d’application", "Protection individuelle"];
+  let warning = "En cas de doute sur la compatibilité du support, réalisez toujours un essai sur une petite zone.";
+  let quantities = [];
+  let brand = "Quai West";
+
+  if (answers.project === "bateau") {
+    title = "Réparation bateau / coque";
+    product = answers.support === "epoxy" ? "Résine époxy + tissu de verre" : answers.boatIssue === "gelcoat" ? "Gelcoat / topcoat de finition" : "Kit de stratification polyester";
+    categoryUrl = answers.support === "epoxy" ? productLinks.epoxy : answers.boatIssue === "gelcoat" ? productLinks.gelcoat : productLinks.polyester;
+    explanation = answers.support === "epoxy" ? "Le support époxy demande une résine compatible pour garantir l’adhérence." : "Pour une coque polyester, résine polyester + mat de verre est souvent une solution efficace.";
+    products = ["Résine adaptée", "Catalyseur ou durcisseur", "Mat/tissu de verre", "Acétone ou nettoyant", "Pinceaux / rouleaux", "Gants nitrile"];
+    warning = "Ne stratifiez pas sur un support humide, gras ou insuffisamment poncé.";
+    const resinKg = surface * 2 * 0.8;
+    quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`, `Fibre : ${formatNumber(surface * 2)} m² environ`];
+  }
+
+  if (answers.project === "surf") {
+    title = "Réparation planche de surf";
+    product = answers.surfBoard === "epoxy-eps" || answers.support === "epoxy" ? "Kit résine époxy surf" : "Kit résine polyester surf";
+    categoryUrl = product.includes("époxy") ? productLinks.epoxy : productLinks.polyester;
+    explanation = product.includes("époxy") ? "Une planche EPS/époxy doit être réparée avec une résine époxy." : "Pour une planche polyester, une résine polyester adaptée au surf convient.";
+    products = ["Résine adaptée", "Tissu de verre fin", "Papier abrasif", "Spatule", "Gants", "Polish finition"];
+    warning = "N’utilisez pas de résine polyester sur une planche EPS/époxy.";
+    quantities = [`Résine estimée : ${formatNumber(Math.max(surface * 0.6, 0.15))} kg`, `Tissu de verre : ${formatNumber(surface * 1.3)} m² environ`];
+  }
+
+  if (answers.project === "moulage") {
+    title = "Moulage / fabrication de pièce";
+    const volumeLiters = getObjectVolumeLiters(answers);
+
+    if (answers.moldingNeed === "reproduction-petite-piece" || volumeLiters <= 5 || answers.moldingNeed === "moule-souple") {
+      product = "Silicone RTV de moulage";
+      categoryUrl = productLinks.silicone;
+      products = ["Silicone RTV de moulage", "Agent de démoulage si nécessaire", "Balance de précision", "Gants", "Spatules", "Récipient de mélange"];
+      explanation = "Chez Quai West, pour la reproduction d’objets de petite taille, nous conseillons un RTV silicone : il permet une reproduction précise des détails et un démoulage plus simple.";
+      quantities = [
+        `Volume objet estimé : ${formatNumber(volumeLiters)} L`,
+        `Silicone RTV : prévoir une marge selon le coffrage et l’épaisseur autour de l’objet`
+      ];
+      warning = "Prévoyez un coffrage étanche et un master propre, sec et compatible avec le silicone RTV.";
+    } else if (answers.moldingNeed === "coulee") {
+      product = "Résine époxy de coulée";
+      categoryUrl = productLinks.epoxy;
+      products = ["Résine époxy de coulée", "Pigments éventuels", "Gants", "Récipients", "Spatules"];
+      explanation = "La coulée et l’inclusion demandent une résine adaptée à l’épaisseur et au rendu souhaité.";
+      warning = "Respectez les épaisseurs maximales de coulée pour éviter l’exothermie.";
+      quantities = [`Volume objet estimé : ${formatNumber(volumeLiters)} L`, `Résine : estimation à confirmer selon volume réel de coulée`];
+    } else {
+      product = "Gelcoat + résine polyester + fibre";
+      categoryUrl = productLinks.polyester;
+      products = ["Gelcoat de moulage", "Résine polyester", "Fibre de verre", "Catalyseur", "Agent de démoulage"];
+      explanation = "Pour tirer une pièce dans un moule, l’association gelcoat + stratification polyester est une solution classique.";
+      const resinKg = Math.max(volumeLiters * 0.8, 1);
+      quantities = [`Volume objet estimé : ${formatNumber(volumeLiters)} L`, `Résine : ${formatNumber(resinKg)} kg minimum`, `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`];
+      warning = "N’oubliez jamais l’agent de démoulage.";
+    }
+  }
+
+  if (answers.project === "carrosserie") {
+    title = "Peinture carrosserie";
+    product = answers.finish === "base-vernis" || answers.finish === "metalisee" ? "Base mate + vernis" : "Peinture polyuréthane brillant direct";
+    categoryUrl = productLinks.peinture;
+    explanation = product.includes("Base") ? "Les finitions métallisées nécessitent généralement une base couleur puis un vernis." : "Pour une couleur RAL unie, le brillant direct est efficace et résistant.";
+    products = ["Peinture", "Durcisseur", "Diluant", "Apprêt si nécessaire", "Dégraissant", "Abrasifs", "Masquage"];
+    warning = "Ne peignez jamais sur un support mal dégraissé ou insuffisamment poncé.";
+    quantities = [`Peinture estimée : ${formatNumber((surface / 9) * 2)} L pour 2 couches`, "Prévoir durcisseur et diluant selon fiche technique"];
+  }
+
+  if (answers.project === "bois") {
+    brand = "Kormatek Bois & Déco";
+    title = "Diagnostic Kormatek Bois & Déco";
+    const p = answers.kormatekProject;
+    const s = answers.kormatekState;
+    const f = answers.kormatekFinish;
+
+    if (p === "terrasse-exterieure" && (s === "grise" || s === "sale")) {
+      product = "Demidekk Terrassfix + Treolje";
+      categoryUrl = productLinks.kormatekTerrassfix;
+      explanation = "Pour une terrasse grisée, tachée ou noircie, commencez par nettoyer/dégriser avec Demidekk Terrassfix, puis protégez avec Treolje.";
+      products = ["Demidekk Terrassfix", "Treolje", "Brosse terrasse", "Abrasifs si nécessaire", "Gants"];
+      warning = "Ne saturez pas une terrasse encore grisée, sale ou humide : le bois doit être propre, sec et ouvert avant protection.";
+      quantities = [`Nettoyant/dégriseur : prévoir selon encrassement`, `Treolje estimé : ${formatNumber(surface / 8)} L par couche`];
+    } else if (p === "terrasse-exterieure") {
+      product = "Treolje";
+      categoryUrl = productLinks.kormatekTreolje;
+      explanation = "Pour protéger une terrasse bois extérieure avec un rendu naturel ou teinté, Treolje est la solution saturateur / imprégnation.";
+      products = ["Treolje", "Demidekk Terrassfix si nettoyage nécessaire", "Brosse plate", "Chiffon non pelucheux", "Gants"];
+      warning = "Appliquez en couches fines et essuyez l’excédent pour éviter un film collant en surface.";
+      quantities = [`Treolje estimé : ${formatNumber(surface / 8)} L par couche`, "Prévoir 1 à 2 couches selon absorption du bois"];
+    } else if (p === "bois-exterieur" && (f === "opaque" || s === "ancienne-peinture")) {
+      product = "Demidekk Cleantech";
+      categoryUrl = productLinks.kormatekCleantech;
+      explanation = "Pour bardage, menuiserie ou bois extérieur avec finition couvrante, Demidekk Cleantech apporte une finition opaque durable et satinée.";
+      products = ["Demidekk Cleantech", "Primaire adapté si bois brut", "Nettoyant si support sale", "Brosse / rouleau", "Abrasifs"];
+      warning = "Éliminez les anciennes parties non adhérentes et respectez la préparation avant mise en peinture.";
+      quantities = [`Peinture/lasure opaque estimée : ${formatNumber(surface / 8)} L par couche`, "Prévoir souvent 2 couches"];
+    } else if (p === "bois-exterieur") {
+      product = "Gamme protection bois extérieur Kormatek";
+      categoryUrl = productLinks.kormatekExterior;
+      explanation = "Pour le bois extérieur, le choix dépend du rendu : transparent/teinté ou opaque couvrant.";
+      products = ["Treolje selon usage", "Demidekk Cleantech pour opaque", "Nettoyant/préparation", "Brosse / rouleau"];
+      warning = "Un bois extérieur doit être propre, sec et sain avant toute protection.";
+      quantities = [`Produit estimé : ${formatNumber(surface / 8)} L par couche`, "Prévoir 1 à 2 couches selon système choisi"];
+    } else if (p === "bois-interieur-transparent") {
+      product = "Panelakk";
+      categoryUrl = productLinks.kormatekPanelakk;
+      explanation = "Pour protéger ou décorer un bois intérieur tout en conservant son aspect, Panelakk est une lasure à l’eau transparente, teintée ou incolore.";
+      products = ["Panelakk", "Abrasif fin", "Brosse adaptée", "Chiffon", "Protection de chantier"];
+      warning = "Poncez légèrement et dépoussiérez parfaitement avant application.";
+      quantities = [`Panelakk estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 1 à 2 couches selon rendu souhaité"];
+    } else if (p === "peinture-interieure") {
+      product = "Vegg & Tag 05";
+      categoryUrl = productLinks.kormatekVeggTag;
+      explanation = "Pour murs et plafonds intérieurs, Vegg & Tag 05 est une peinture murale mate à base d’eau.";
+      products = ["Vegg & Tag 05", "Rouleau murs/plafonds", "Brosse à rechampir", "Adhésif de masquage", "Bâche de protection"];
+      warning = "Sur support taché, farinant ou très poreux, prévoyez une préparation adaptée.";
+      quantities = [`Peinture murale estimée : ${formatNumber((surface / 10) * 2)} L pour 2 couches`];
+    } else if (p === "sol-bois-transparent") {
+      product = "Trestjerner Gulvlakk";
+      categoryUrl = productLinks.kormatekGulvlakk;
+      explanation = "Pour parquet, escalier ou sol bois intérieur avec finition transparente résistante, Trestjerner Gulvlakk est la solution vernis.";
+      products = ["Trestjerner Gulvlakk", "Abrasifs", "Rouleau/laqueur", "Dépoussiérage soigneux", "Protection de chantier"];
+      warning = "Sur ancien vernis, poncez et vérifiez l’adhérence.";
+      quantities = [`Vernis estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 2 à 3 couches selon sollicitation"];
+    } else if (p === "sol-beton-transparent") {
+      product = "Trestjerner Betongolje";
+      categoryUrl = productLinks.kormatekBetongolje;
+      explanation = "Pour sol béton, dalle poreuse, terre cuite, OSB ou Fermacell avec protection transparente, Trestjerner Betongolje fixe les poussières et bouche les pores.";
+      products = ["Trestjerner Betongolje", "Nettoyant / dégraissant", "Rouleau sol", "Aspirateur / dépoussiérage", "Gants"];
+      warning = "Le béton doit être propre, sec, poreux et parfaitement dépoussiéré.";
+      quantities = [`Saturateur béton estimé : ${formatNumber(surface / 8)} L par couche`, "Consommation variable selon porosité"];
+    } else if (p === "sol-interieur-opaque") {
+      product = "Trestjerner Gulvmaling";
+      categoryUrl = productLinks.kormatekGulvmaling;
+      explanation = "Pour un sol intérieur en bois ou béton avec finition couvrante, Trestjerner Gulvmaling est une peinture dure adaptée aux sols.";
+      products = ["Trestjerner Gulvmaling", "Nettoyant / dégraissant", "Abrasifs", "Rouleau sol", "Adhésif de masquage"];
+      warning = "Sur sol déjà peint ou verni, vérifiez l’adhérence et poncez avant application.";
+      quantities = [`Peinture sol estimée : ${formatNumber((surface / 8) * 2)} L pour 2 couches`];
+    } else {
+      product = "Sélection Kormatek Bois & Déco";
+      categoryUrl = productLinks.kormatekHome;
+      products = ["Préparation du support", "Produit de finition adapté", "Brosse / rouleau", "Abrasifs"];
+      quantities = [`Estimation générale : ${formatNumber(surface / 8)} L par couche`];
+    }
+  }
+
+
+  if (answers.project === "piscine") {
+    brand = "Quai West";
+    title = "Remplacer un liner par une stratification polyester";
+    const poolSurface = getPoolSurface(answers);
+    product = "Système de stratification polyester pour piscine béton";
+    categoryUrl = productLinks.polyester;
+    explanation = "Pour remplacer un liner sur piscine béton, la solution consiste à préparer le support puis appliquer un système polyester avec résine, mat de verre et finition gelcoat/topcoat adaptée.";
+    products = getPoolMaterials(poolSurface);
+    warning = "Le support béton doit être parfaitement préparé, sain, sec, poncé/dépoussiéré et compatible avant stratification.";
+    quantities = [
+      `Surface fond + parois avec marge : ${formatNumber(poolSurface)} m²`,
+      ...getPoolMaterials(poolSurface)
+    ];
+  }
+
+  if (answers.project === "stratification" || answers.project === "inconnu") {
+    title = answers.project === "stratification" ? "Stratification / étanchéité" : "Projet à préciser";
+    product = answers.support === "epoxy" ? "Résine époxy + renfort" : "Résine polyester ou époxy selon support";
+    categoryUrl = answers.support === "epoxy" ? productLinks.epoxy : productLinks.polyester;
+    products = ["Résine adaptée", "Renfort fibre de verre", "Catalyseur ou durcisseur", "Abrasifs", "Gants"];
+    const resinKg = surface * 2 * 0.8;
+    quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Renfort : ${formatNumber(surface * 2)} m² environ`];
+  }
+
+  return { title, product, categoryUrl, explanation, products, warning, quantities, surface, brand };
+}
+
+
+function estimateBasket(result, answers) {
+  const surface = Math.max(parseFloat(String(result.surface || "1").replace(",", ".")) || 1, 0.1);
+  const project = answers.project;
+  let low = 0;
+  let high = 0;
+  let label = "Prix estimé du panier";
+  let note = "Estimation indicative à confirmer selon conditionnement, teinte, stock et options choisies.";
+
+  if (project === "bateau") {
+    const resinKg = surface * 2 * 0.8;
+    low = 35 + resinKg * 18 + surface * 10;
+    high = 65 + resinKg * 30 + surface * 18;
+    label = "Panier réparation coque estimé";
+  }
+
+  if (project === "surf") {
+    low = 28 + surface * 25;
+    high = 75 + surface * 45;
+    label = "Panier réparation surf estimé";
+  }
+
+  if (project === "moulage") {
+    const volumeLiters = getObjectVolumeLiters(answers);
+    if ((answers.moldingNeed || "").includes("moule") || result.product.toLowerCase().includes("silicone") || volumeLiters <= 5) {
+      low = 45 + Math.max(volumeLiters, 1) * 18;
+      high = 120 + Math.max(volumeLiters, 1) * 45;
+      label = "Panier moulage RTV / silicone estimé";
+    } else {
+      low = 55 + Math.max(volumeLiters, 1) * 25;
+      high = 140 + Math.max(volumeLiters, 1) * 65;
+      label = "Panier fabrication pièce estimé";
+    }
+  }
+
+  if (project === "piscine") {
+    const poolSurface = getPoolSurface(answers);
+    low = 30 * poolSurface;
+    high = 55 * poolSurface;
+    label = "Panier stratification piscine estimé";
+  }
+
+  if (project === "carrosserie") {
+    low = 55 + surface * 12;
+    high = 140 + surface * 25;
+    label = "Panier peinture carrosserie estimé";
+  }
+
+  if (project === "bois") {
+    const p = answers.kormatekProject;
+
+    if (p === "terrasse-exterieure") {
+      low = 45 + surface * 4.5;
+      high = 95 + surface * 8.5;
+      label = "Panier terrasse bois Kormatek estimé";
+    } else if (p === "peinture-interieure") {
+      low = 35 + surface * 3.2;
+      high = 85 + surface * 6.5;
+      label = "Panier peinture intérieure Kormatek estimé";
+    } else if (p === "sol-interieur-opaque" || p === "sol-beton-transparent" || p === "sol-bois-transparent") {
+      low = 55 + surface * 5.5;
+      high = 120 + surface * 10;
+      label = "Panier sol intérieur Kormatek estimé";
+    } else {
+      low = 45 + surface * 4;
+      high = 105 + surface * 8;
+      label = "Panier bois Kormatek estimé";
+    }
+  }
+
+  if (project === "stratification" || project === "inconnu") {
+    low = 45 + surface * 22;
+    high = 120 + surface * 45;
+    label = "Panier stratification estimé";
+  }
+
+  return {
+    label,
+    low: Math.max(Math.round(low), 15),
+    high: Math.max(Math.round(high), 25),
+    note
+  };
+}
+
+function formatPrice(value) {
+  return Number(value || 0).toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0
+  });
+}
+
+export default function Home() {
+  const [started, setStarted] = useState(false);
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({ surface: "1" });
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState("");
+
+  const questions = useMemo(() => getQuestions(answers), [answers]);
+  const current = questions[step];
+  const isLast = step >= questions.length;
+  const result = useMemo(() => recommend(answers), [answers]);
+  const basketEstimate = useMemo(() => estimateBasket(result, answers), [result, answers]);
+  const progress = Math.min(((step + 1) / Math.max(questions.length, 1)) * 100, 100);
+
+  function selectAnswer(key, value, autoAdvance = true) {
+    const next = { ...answers, [key]: value };
+    if (key === "project") {
+      Object.keys(next).forEach(k => {
+        if (!["project", "level", "surface"].includes(k)) delete next[k];
+      });
+      if (value === "bois") next.support = "bois";
+      setStep(0);
+    }
+    setAnswers(next);
+    if (!autoAdvance) return;
+  }
+
+  function nextStep() {
+    if (!current) return;
+    if (current.type === "dimensions") {
+      if (!answers.objectLength || !answers.objectWidth || !answers.objectHeight) return;
+    } else if (current.type === "poolDimensions") {
+      if (!answers.poolLength || !answers.poolWidth || !answers.poolDepth) return;
+    } else if (!answers[current.key]) return;
+    setStep(s => s + 1);
+  }
+
+  function reset() {
+    setStarted(false);
+    setStep(0);
+    setAnswers({ surface: "1" });
+    setShowLeadForm(false);
+    setSubmitStatus("");
+  }
+
+  function encodeFormData(data) {
+    return new URLSearchParams(data).toString();
+  }
+
+  async function handleLeadSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+
+    const payload = {
+      "form-name": "diagnostic-quai-west",
+      "bot-field": "",
+      marque: result.brand || "",
+      projet: labelFor("project", answers.project),
+      projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
+      etat_kormatek: labelFor("kormatekState", answers.kormatekState),
+      rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish),
+      support: labelFor("support", answers.support),
+      surface: `${result.surface} m²`,
+      niveau: labelFor("level", answers.level),
+      priorite: labelFor("priority", answers.priority),
+      produit_recommande: result.product || "",
+      forme_piscine: labelFor("poolShape", answers.poolShape),
+      dimensions_piscine: `${answers.poolLength || ""} x ${answers.poolWidth || ""} x ${answers.poolDepth || ""} m`,
+      surface_piscine: answers.project === "piscine" ? `${formatNumber(getPoolSurface(answers))} m²` : "",
+      dimensions_objet: answers.project === "moulage" ? `${answers.objectLength || ""} x ${answers.objectWidth || ""} x ${answers.objectHeight || ""} cm` : "",
+      volume_objet: answers.project === "moulage" ? `${formatNumber(getObjectVolumeLiters(answers))} L` : "",
+      quantites: (result.quantities || []).join(" | "),
+      panier_conseille: (result.products || []).join(" | "),
+      erreur_a_eviter: result.warning || "",
+      prix_estime_min: formatPrice(basketEstimate.low),
+      prix_estime_max: formatPrice(basketEstimate.high),
+      prenom: form.prenom?.value || "",
+      email: form.email?.value || "",
+      telephone: form.telephone?.value || "",
+      commentaire: form.commentaire?.value || "",
+      optin: form.optin?.checked ? "oui" : "non"
+    };
+
+    setSubmitStatus("Envoi en cours...");
+
+    try {
+      const response = await fetch("/forms.html", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: encodeFormData(payload)
+      });
+
+      if (!response.ok) throw new Error("Erreur Netlify Forms");
+
+      setSubmitStatus("Diagnostic envoyé avec succès.");
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      setSubmitStatus("Erreur lors de l’envoi. Vérifiez Netlify Forms ou réessayez.");
+    }
+  }
+
+  if (!started) {
+    return (
+      <main className="page">
+        <section className="hero">
+          <div className="badge">Assistant technique Quai West + Kormatek</div>
+          <h1>Trouvez le bon produit, la bonne quantité et les bons accessoires en moins de 2 minutes.</h1>
+          <p>Réparation bateau, surf, moulage, peinture carrosserie, stratification, rénovation bois, terrasse, sol intérieur, béton ou peinture décorative.</p>
+          <div className="heroActions">
+            <button className="primary" onClick={() => setStarted(true)}>Démarrer mon diagnostic</button>
+            <a className="secondary" href={productLinks.boutique} target="_blank">Voir Quai West</a>
+            <a className="secondary" href={productLinks.kormatekHome} target="_blank">Voir Kormatek Bois & Déco</a>
+          </div>
+          <div className="trust"><span>✓ Calcul quantité</span><span>✓ Panier conseillé</span><span>✓ Erreurs à éviter</span></div>
+        </section>
+      </main>
+    );
+  }
+
+  if (isLast) {
+    return (
+      <main className="page">
+        <section className="resultHeader">
+          <button className="backLink" onClick={reset}>← Recommencer</button>
+          <div className="badge">{result.brand}</div>
+          <h1>{result.title}</h1>
+          <p>Voici une première estimation. Elle doit être confirmée selon la fiche technique du produit et l’état réel du support.</p>
+        </section>
+
+        <section className="resultGrid">
+          <article className="card highlight">
+            <h2>Produit recommandé</h2>
+            <h3>{result.product}</h3>
+            <p>{result.explanation}</p>
+            <a className="primary full" href={result.categoryUrl} target="_blank">
+              {answers.project === "bois" ? "Voir la solution Kormatek recommandée" : "Voir les produits recommandés"}
+            </a>
+          </article>
+
+          <article className="card">
+            <h2>Votre diagnostic</h2>
+            <ul className="cleanList">
+              <li><strong>Projet :</strong> {labelFor("project", answers.project)}</li>
+              {answers.project === "bois" ? (
+                <>
+                  <li><strong>Projet Kormatek :</strong> {labelFor("kormatekProject", answers.kormatekProject)}</li>
+                  <li><strong>État :</strong> {labelFor("kormatekState", answers.kormatekState)}</li>
+                  <li><strong>Rendu :</strong> {labelFor("kormatekFinish", answers.kormatekFinish)}</li>
+                </>
+              ) : answers.project === "piscine" ? (
+                <>
+                  <li><strong>Forme piscine :</strong> {labelFor("poolShape", answers.poolShape)}</li>
+                  <li><strong>Dimensions :</strong> {answers.poolLength} x {answers.poolWidth} x {answers.poolDepth} m</li>
+                  <li><strong>Surface calculée :</strong> {formatNumber(getPoolSurface(answers))} m²</li>
+                </>
+              ) : answers.project === "moulage" ? (
+                <>
+                  <li><strong>Type :</strong> {labelFor("moldingNeed", answers.moldingNeed)}</li>
+                  <li><strong>Dimensions objet :</strong> {answers.objectLength} x {answers.objectWidth} x {answers.objectHeight} cm</li>
+                  <li><strong>Volume estimé :</strong> {formatNumber(getObjectVolumeLiters(answers))} L</li>
+                </>
+              ) : (
+                <li><strong>Support :</strong> {labelFor("support", answers.support)}</li>
+              )}
+              <li><strong>Surface :</strong> {formatNumber(result.surface)} m²</li>
+              <li><strong>Niveau :</strong> {labelFor("level", answers.level)}</li>
+              <li><strong>Priorité :</strong> {labelFor("priority", answers.priority)}</li>
+            </ul>
+          </article>
+
+          <article className="card"><h2>Quantité estimée</h2><ul className="cleanList">{result.quantities.map((q, i) => <li key={i}>{q}</li>)}</ul></article>
+
+          <article className="card priceCard">
+            <h2>{basketEstimate.label}</h2>
+            <div className="priceRange">{formatPrice(basketEstimate.low)} à {formatPrice(basketEstimate.high)}</div>
+            <p>{basketEstimate.note}</p>
+          </article>
+
+          <article className="card"><h2>Panier conseillé</h2><ul className="pillList">{result.products.map((p, i) => <li key={i}>{p}</li>)}</ul></article>
+          <article className="card warning"><h2>Erreur à éviter</h2><p>{result.warning}</p></article>
+
+          <article className="card">
+            <h2>Recevoir le diagnostic</h2>
+            <p>Envoyez le diagnostic pour être recontacté ou conserver la recommandation.</p>
+            <button className="secondary full" onClick={() => setShowLeadForm(!showLeadForm)}>Recevoir mon diagnostic par email</button>
+          </article>
+        </section>
+
+        {showLeadForm && (
+          <section className="leadBox">
+            <h2>Recevoir mon diagnostic</h2>
+            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
+              <input type="hidden" name="form-name" value="diagnostic-quai-west" />
+              <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
+              <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
+              <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
+              <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>
+              <label>Commentaire<textarea name="commentaire" rows="4" placeholder="Précisez votre projet"></textarea></label>
+              <label className="checkbox"><input type="checkbox" name="optin" value="oui" /> J’accepte de recevoir des conseils techniques et offres.</label>
+              <input type="hidden" name="prix_estime_min" value={formatPrice(basketEstimate.low)} />
+              <input type="hidden" name="prix_estime_max" value={formatPrice(basketEstimate.high)} />
+              <button className="primary" type="submit">Envoyer mon diagnostic</button>
+              {submitStatus && <p className="formStatus">{submitStatus}</p>}
+            </form>
+          </section>
+        )}
+      </main>
+    );
+  }
+
+  return (
+    <main className="page">
+      <section className="quiz">
+        <div className="topBar">
+          <button className="backLink" onClick={() => setStep(s => Math.max(s - 1, 0))} disabled={step === 0}>← Retour</button>
+          <span>Étape {step + 1} sur {questions.length}</span>
+        </div>
+        <div className="progress"><span style={{ width: `${progress}%` }} /></div>
+        <div className="breadcrumb">
+          {Object.entries(answers)
+            .filter(([key, value]) => value && !["surface", "support"].includes(key))
+            .map(([key, value]) => labelFor(key, value))
+            .filter(Boolean)
+            .join(" → ")}
+        </div>
+        <h1>{current.title}</h1>
+
+        {current.type === "cards" && (
+          <div className="options">
+            {current.options.map(option => (
+              <button key={option.value} className={`option ${answers[current.key] === option.value ? "selected" : ""}`} onClick={() => selectAnswer(current.key, option.value)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+
+        {current.type === "dimensions" && (
+          <div className="dimensionBox">
+            <input placeholder="Longueur (cm)" value={answers.objectLength || ""} onChange={(e) => selectAnswer("objectLength", e.target.value, false)} />
+            <input placeholder="Largeur (cm)" value={answers.objectWidth || ""} onChange={(e) => selectAnswer("objectWidth", e.target.value, false)} />
+            <input placeholder="Hauteur (cm)" value={answers.objectHeight || ""} onChange={(e) => selectAnswer("objectHeight", e.target.value, false)} />
+            <p className="helperText">Pour les petits objets, Quai West recommande généralement un RTV silicone de moulage.</p>
+          </div>
+        )}
+
+        {current.type === "poolDimensions" && (
+          <div className="dimensionBox">
+            <input placeholder="Longueur (m)" value={answers.poolLength || ""} onChange={(e) => selectAnswer("poolLength", e.target.value, false)} />
+            <input placeholder="Largeur / diamètre (m)" value={answers.poolWidth || ""} onChange={(e) => selectAnswer("poolWidth", e.target.value, false)} />
+            <input placeholder="Profondeur moyenne (m)" value={answers.poolDepth || ""} onChange={(e) => selectAnswer("poolDepth", e.target.value, false)} />
+            <p className="helperText">Le calcul estime le fond + les parois + une marge de 8 %.</p>
+          </div>
+        )}
+
+        {current.type === "surface" && (
+          <div className="surfaceBox">
+            <input type="number" min="0.1" step="0.1" value={answers.surface} onChange={(e) => selectAnswer("surface", e.target.value)} />
+            <span>m²</span>
+            <div className="quickSurfaces">
+              {["0.25", "0.5", "1", "3", "5", "10", "20", "50"].map(value => <button key={value} onClick={() => selectAnswer("surface", value)}>{value} m²</button>)}
+            </div>
+          </div>
+        )}
+
+        <div className="navActions">
+          <button className="secondary" onClick={reset}>Quitter</button>
+          <button className="primary" onClick={nextStep} disabled={!answers[current.key]}>Continuer</button>
+        </div>
+      </section>
+    </main>
+  );
 }
