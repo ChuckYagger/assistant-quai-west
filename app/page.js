@@ -310,6 +310,90 @@ function recommend(answers) {
   return { title, product, categoryUrl, explanation, products, warning, quantities, surface, brand };
 }
 
+
+function estimateBasket(result, answers) {
+  const surface = Math.max(parseFloat(String(result.surface || "1").replace(",", ".")) || 1, 0.1);
+  const project = answers.project;
+  let low = 0;
+  let high = 0;
+  let label = "Prix estimé du panier";
+  let note = "Estimation indicative à confirmer selon conditionnement, teinte, stock et options choisies.";
+
+  if (project === "bateau") {
+    const resinKg = surface * 2 * 0.8;
+    low = 35 + resinKg * 18 + surface * 10;
+    high = 65 + resinKg * 30 + surface * 18;
+    label = "Panier réparation coque estimé";
+  }
+
+  if (project === "surf") {
+    low = 28 + surface * 25;
+    high = 75 + surface * 45;
+    label = "Panier réparation surf estimé";
+  }
+
+  if (project === "moulage") {
+    if ((answers.moldingNeed || "").includes("moule") || result.product.toLowerCase().includes("silicone")) {
+      low = 45 + surface * 35;
+      high = 120 + surface * 80;
+      label = "Panier moulage RTV / silicone estimé";
+    } else {
+      low = 55 + surface * 35;
+      high = 140 + surface * 75;
+      label = "Panier fabrication pièce estimé";
+    }
+  }
+
+  if (project === "carrosserie") {
+    low = 55 + surface * 12;
+    high = 140 + surface * 25;
+    label = "Panier peinture carrosserie estimé";
+  }
+
+  if (project === "bois") {
+    const p = answers.kormatekProject;
+
+    if (p === "terrasse-exterieure") {
+      low = 45 + surface * 4.5;
+      high = 95 + surface * 8.5;
+      label = "Panier terrasse bois Kormatek estimé";
+    } else if (p === "peinture-interieure") {
+      low = 35 + surface * 3.2;
+      high = 85 + surface * 6.5;
+      label = "Panier peinture intérieure Kormatek estimé";
+    } else if (p === "sol-interieur-opaque" || p === "sol-beton-transparent" || p === "sol-bois-transparent") {
+      low = 55 + surface * 5.5;
+      high = 120 + surface * 10;
+      label = "Panier sol intérieur Kormatek estimé";
+    } else {
+      low = 45 + surface * 4;
+      high = 105 + surface * 8;
+      label = "Panier bois Kormatek estimé";
+    }
+  }
+
+  if (project === "stratification" || project === "inconnu") {
+    low = 45 + surface * 22;
+    high = 120 + surface * 45;
+    label = "Panier stratification estimé";
+  }
+
+  return {
+    label,
+    low: Math.max(Math.round(low), 15),
+    high: Math.max(Math.round(high), 25),
+    note
+  };
+}
+
+function formatPrice(value) {
+  return Number(value || 0).toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0
+  });
+}
+
 export default function Home() {
   const [started, setStarted] = useState(false);
   const [step, setStep] = useState(0);
@@ -321,6 +405,7 @@ export default function Home() {
   const current = questions[step];
   const isLast = step >= questions.length;
   const result = useMemo(() => recommend(answers), [answers]);
+  const basketEstimate = useMemo(() => estimateBasket(result, answers), [result, answers]);
   const progress = Math.min(((step + 1) / Math.max(questions.length, 1)) * 100, 100);
 
   function selectAnswer(key, value) {
@@ -372,6 +457,8 @@ export default function Home() {
       quantites: (result.quantities || []).join(" | "),
       panier_conseille: (result.products || []).join(" | "),
       erreur_a_eviter: result.warning || "",
+      prix_estime_min: formatPrice(basketEstimate.low),
+      prix_estime_max: formatPrice(basketEstimate.high),
       prenom: form.prenom?.value || "",
       email: form.email?.value || "",
       telephone: form.telephone?.value || "",
@@ -456,6 +543,13 @@ export default function Home() {
           </article>
 
           <article className="card"><h2>Quantité estimée</h2><ul className="cleanList">{result.quantities.map((q, i) => <li key={i}>{q}</li>)}</ul></article>
+
+          <article className="card priceCard">
+            <h2>{basketEstimate.label}</h2>
+            <div className="priceRange">{formatPrice(basketEstimate.low)} à {formatPrice(basketEstimate.high)}</div>
+            <p>{basketEstimate.note}</p>
+          </article>
+
           <article className="card"><h2>Panier conseillé</h2><ul className="pillList">{result.products.map((p, i) => <li key={i}>{p}</li>)}</ul></article>
           <article className="card warning"><h2>Erreur à éviter</h2><p>{result.warning}</p></article>
 
@@ -477,6 +571,8 @@ export default function Home() {
               <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>
               <label>Commentaire<textarea name="commentaire" rows="4" placeholder="Précisez votre projet"></textarea></label>
               <label className="checkbox"><input type="checkbox" name="optin" value="oui" /> J’accepte de recevoir des conseils techniques et offres.</label>
+              <input type="hidden" name="prix_estime_min" value={formatPrice(basketEstimate.low)} />
+              <input type="hidden" name="prix_estime_max" value={formatPrice(basketEstimate.high)} />
               <button className="primary" type="submit">Envoyer mon diagnostic</button>
               {submitStatus && <p className="formStatus">{submitStatus}</p>}
             </form>
