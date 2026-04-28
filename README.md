@@ -46,3 +46,28 @@ Cette version force la détection du formulaire avec :
 
 Après déploiement, vérifier dans Netlify :
 Site > Forms > diagnostic-quai-west
+
+
+## Version V2 Kormatek
+
+Modifications :
+- Le parcours Kormatek ne pose plus la question générique "support principal".
+- Le support est automatiquement considéré comme bois / sol / béton selon le choix Kormatek.
+- Ajout de parcours :
+  - Terrasse bois extérieure
+  - Bardage / menuiserie / bois extérieur
+  - Bois intérieur transparent / lasure
+  - Peinture décorative intérieure murs/plafonds
+  - Sol intérieur bois transparent / vernis
+  - Sol intérieur opaque bois ou béton
+  - Sol béton transparent / anti-poussière
+
+Produits intégrés :
+- Demidekk Terrassfix
+- Treolje
+- Demidekk Cleantech
+- Panelakk
+- Vegg & Tag 05
+- Trestjerner Gulvlakk
+- Trestjerner Betongolje
+- Trestjerner Gulvmaling

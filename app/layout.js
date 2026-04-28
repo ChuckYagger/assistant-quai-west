@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Assistant Projet Quai West",
-  description: "Assistant projet pour composites, peinture, bateau, surf et rénovation bois/terrasse avec recommandations Quai West et Kormatek Bois & Déco.",
+  title: "Assistant Projet Quai West + Kormatek",
+  description: "Assistant projet pour composites, peinture, bateau, surf, rénovation bois, terrasse, peinture intérieure, sol intérieur et béton avec recommandations Quai West et Kormatek Bois & Déco.",
 };
 
 export default function RootLayout({ children }) {
