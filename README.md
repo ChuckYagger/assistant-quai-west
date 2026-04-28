@@ -1,39 +1,31 @@
-# Assistant Projet Quai West + Kormatek V5
+# Assistant Quai West + Kormatek — V8 Piscine complète
 
-Version corrigée : build Next.js OK + formulaire Netlify robuste.
+Version corrigée avec design complet conservé et bloc piscine complet.
 
-## Publication
+## Inclus
 
-1. Remplacer les fichiers dans GitHub
-2. Commit changes
-3. Dans Netlify : Deploys > Trigger deploy > Clear cache and deploy site
-4. Tester le formulaire
-5. Vérifier : Forms > diagnostic-quai-west > Submissions
+- Design complet de la version stable
+- Étape 1 sans “Je ne sais pas”
+- Fil d’Ariane
+- Suppression de Béton dans les supports généraux
+- Suppression de Mouler dans les objectifs généraux
+- Peinture carrosserie limitée à Peindre / Finition esthétique
+- Parcours moulage corrigé avec dimensions objet
+- Recommandation RTV pour petits objets
+- Bloc piscine complet : formes courantes + dimensions + surface fond/parois/marge
+- Liste matériel piscine issue de la logique du fichier Excel fourni
+- Prix estimé panier
+- Netlify Forms avec champs complets
 
-## Important
+## Piscine
 
-Le formulaire statique de détection Netlify est dans `public/forms.html`.
-Le formulaire visible envoie les données via `fetch("/forms.html")`.
-
-
-## Version V6 - Prix estimé panier
-
-Ajout d’un bloc "Prix estimé du panier" dans la page résultat.
-
-Important :
-- Les prix sont indicatifs.
-- La grille est modifiable dans `app/page.js`, fonction `estimateBasket`.
-- Les champs `prix_estime_min` et `prix_estime_max` sont transmis à Netlify Forms.
-
-
-## V8 design OK
-Cette version conserve le design complet de la V6 et ajoute :
-- suppression "Je ne sais pas"
-- fil d’Ariane
-- suppression Béton et Mouler
-- objectifs carrosserie limités
-- parcours moulage corrigé avec dimensions + RTV
-- bloc piscine liner vers stratification polyester
-- calcul surface piscine fond + parois + marge 8 %
-- prix estimé panier conservé
-- Netlify Forms conservé
+Le calcul reprend :
+- surface = fond + parois + 8 % de marge
+- résine polyester iso 172 = surface / 10 x 20 kg
+- mat 300 = surface x 0,7 kg
+- gelcoat Iso NPG = surface x 0,6 kg
+- catalyseur = (résine + gelcoat) x 2 %
+- styrène paraffiné = 2 L
+- acétone = 24 L
+- styrène monomère = surface / 10 L
+- pâte pigmentaire blanc = surface / 10 kg
