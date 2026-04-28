@@ -149,7 +149,9 @@ const specificQuestions = {
       { value: "haricot", label: "Haricot / forme libre" },
       { value: "l", label: "En L" },
       { value: "couloir", label: "Couloir de nage" }
-    ]},
+    ]<p className="helperText">
+👉 En 30 secondes, obtenez la liste complète du matériel pour remplacer votre liner par une stratification polyester
+</p>},
     { key: "poolDimensions", title: "Indiquez les dimensions de votre piscine", type: "poolDimensions" }
   ],
   stratification: []
