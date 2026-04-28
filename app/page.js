@@ -156,6 +156,13 @@ const specificQuestions = {
 };
 
 function getQuestions(answers) {
+  if (answers.project === "piscine") {
+    return [
+      baseQuestions.find(q => q.key === "project"),
+      ...specificQuestions.piscine
+    ];
+  }
+
   let filteredBase = baseQuestions
     .filter(q => !(q.skipFor || []).includes(answers.project))
     .map(q => {
@@ -169,13 +176,6 @@ function getQuestions(answers) {
     filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
   }
 
- if (answers.project === "piscine") {
-  return [
-    { key: "project", ...baseQuestions.find(q => q.key === "project") },
-    specificQuestions.piscine[0], // forme
-    specificQuestions.piscine[1]  // dimensions
-  ];
-}
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
 
@@ -724,6 +724,12 @@ export default function Home() {
               </button>
             ))}
           </div>
+        )}
+
+        {current.key === "poolShape" && (
+          <p className="helperText">
+            👉 En 30 secondes, obtenez la liste complète du matériel pour remplacer votre liner par une stratification polyester.
+          </p>
         )}
 
         {current.type === "surface" && (

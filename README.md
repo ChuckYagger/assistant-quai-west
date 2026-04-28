@@ -29,3 +29,9 @@ Le calcul reprend :
 - acétone = 24 L
 - styrène monomère = surface / 10 L
 - pâte pigmentaire blanc = surface / 10 kg
+
+
+## V8.1 Piscine directe
+
+- Parcours piscine direct : Projet → Forme du bassin → Dimensions → Résultat.
+- Texte d’aide ajouté sous la question de forme du bassin.
