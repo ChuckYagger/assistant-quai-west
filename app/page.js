@@ -355,20 +355,56 @@ export default function Home() {
 
 
   function encodeFormData(data) {
-    return Object.keys(data)
-      .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key] ?? "")}`)
-      .join("&");
+    return new URLSearchParams(data).toString();
   }
 
   async function handleLeadSubmit(event) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const payload = Object.fromEntries(formData.entries());
 
-    if (!payload.optin) {
-      payload.optin = "non";
+    const form = event.currentTarget;
+    const payload = {
+      "form-name": "diagnostic-quai-west",
+      "bot-field": "",
+      marque: result.brand || "",
+      projet: labelFor("project", answers.project),
+      projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
+      etat_kormatek: labelFor("kormatekState", answers.kormatekState),
+      rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish),
+      support: labelFor("support", answers.support),
+      surface: `${result.surface} m²`,
+      niveau: labelFor("level", answers.level),
+      priorite: labelFor("priority", answers.priority),
+      produit_recommande: result.product || "",
+      quantites: (result.quantities || []).join(" | "),
+      panier_conseille: (result.products || []).join(" | "),
+      erreur_a_eviter: result.warning || "",
+      prenom: form.prenom?.value || "",
+      email: form.email?.value || "",
+      telephone: form.telephone?.value || "",
+      commentaire: form.commentaire?.value || "",
+      optin: form.optin?.checked ? "oui" : "non"
+    };
+
+    setSubmitStatus("Envoi en cours...");
+
+    try {
+      const response = await fetch("/forms.html", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: encodeFormData(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur Netlify Forms");
+      }
+
+      setSubmitStatus("Diagnostic envoyé avec succès.");
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      setSubmitStatus("Erreur lors de l’envoi. Vérifiez Netlify Forms ou réessayez.");
     }
+  }
 
     setSubmitStatus("Envoi en cours...");
 
@@ -477,6 +513,9 @@ export default function Home() {
               <input type="hidden" name="niveau" value={labelFor("level", answers.level)} />
               <input type="hidden" name="priorite" value={labelFor("priority", answers.priority)} />
               <input type="hidden" name="produit_recommande" value={result.product} />
+              <input type="hidden" name="quantites" value={(result.quantities || []).join(" | ")} />
+              <input type="hidden" name="panier_conseille" value={(result.products || []).join(" | ")} />
+              <input type="hidden" name="erreur_a_eviter" value={result.warning} />
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
               <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>

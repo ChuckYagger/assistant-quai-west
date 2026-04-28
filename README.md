@@ -85,3 +85,17 @@ Après déploiement :
 2. Remplir un diagnostic
 3. Envoyer le formulaire
 4. Vérifier dans Netlify > Forms > diagnostic-quai-west > Submissions
+
+
+## Version V4 - Correction CSV vide
+
+Cette version corrige les CSV vides avec :
+- envoi explicite vers `/forms.html`
+- champs construits manuellement dans `handleLeadSubmit`
+- tous les champs déclarés dans `public/forms.html`
+- ajout des champs `quantites`, `panier_conseille`, `erreur_a_eviter`
+
+Après remplacement sur GitHub :
+1. Netlify > Deploys > Trigger deploy > Clear cache and deploy site
+2. Tester une soumission
+3. Vérifier Forms > diagnostic-quai-west > Submissions
