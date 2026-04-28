@@ -7,15 +7,11 @@ const productLinks = {
   polyester: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+polyester",
   epoxy: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+epoxy",
   gelcoat: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=gelcoat",
-  fibre: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=fibre+de+verre",
   silicone: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=silicone+moulage",
   peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
 
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
   kormatekExterior: "https://www.kormatek-boisetdeco.fr/11-protection-du-bois-exterieur",
-  kormatekInteriorWood: "https://www.kormatek-boisetdeco.fr/10-protection-du-bois-interieur",
-  kormatekInteriorDecorative: "https://www.kormatek-boisetdeco.fr/36-peinture-interieure-decorative",
-  kormatekInteriorFloor: "https://www.kormatek-boisetdeco.fr/12-peintures-pour-sol-interieur",
   kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
   kormatekTreolje: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
@@ -227,7 +223,6 @@ function recommend(answers) {
   if (answers.project === "bois") {
     brand = "Kormatek Bois & Déco";
     title = "Diagnostic Kormatek Bois & Déco";
-
     const p = answers.kormatekProject;
     const s = answers.kormatekState;
     const f = answers.kormatekFinish;
@@ -250,14 +245,14 @@ function recommend(answers) {
       product = "Demidekk Cleantech";
       categoryUrl = productLinks.kormatekCleantech;
       explanation = "Pour bardage, menuiserie ou bois extérieur avec finition couvrante, Demidekk Cleantech apporte une finition opaque durable et satinée.";
-      products = ["Demidekk Cleantech", "Primaire adapté si bois brut", "Nettoyant type Kraftvask si support sale", "Brosse / rouleau", "Abrasifs"];
+      products = ["Demidekk Cleantech", "Primaire adapté si bois brut", "Nettoyant si support sale", "Brosse / rouleau", "Abrasifs"];
       warning = "Éliminez les anciennes parties non adhérentes et respectez la préparation avant mise en peinture.";
       quantities = [`Peinture/lasure opaque estimée : ${formatNumber(surface / 8)} L par couche`, "Prévoir souvent 2 couches"];
     } else if (p === "bois-exterieur") {
       product = "Gamme protection bois extérieur Kormatek";
       categoryUrl = productLinks.kormatekExterior;
       explanation = "Pour le bois extérieur, le choix dépend du rendu : transparent/teinté ou opaque couvrant.";
-      products = ["Trebitt / Treolje selon usage", "Demidekk Cleantech pour opaque", "Nettoyant/préparation", "Brosse / rouleau"];
+      products = ["Treolje selon usage", "Demidekk Cleantech pour opaque", "Nettoyant/préparation", "Brosse / rouleau"];
       warning = "Un bois extérieur doit être propre, sec et sain avant toute protection.";
       quantities = [`Produit estimé : ${formatNumber(surface / 8)} L par couche`, "Prévoir 1 à 2 couches selon système choisi"];
     } else if (p === "bois-interieur-transparent") {
@@ -265,40 +260,39 @@ function recommend(answers) {
       categoryUrl = productLinks.kormatekPanelakk;
       explanation = "Pour protéger ou décorer un bois intérieur tout en conservant son aspect, Panelakk est une lasure à l’eau transparente, teintée ou incolore.";
       products = ["Panelakk", "Abrasif fin", "Brosse adaptée", "Chiffon", "Protection de chantier"];
-      warning = "Poncez légèrement et dépoussiérez parfaitement avant application pour éviter les défauts de finition.";
+      warning = "Poncez légèrement et dépoussiérez parfaitement avant application.";
       quantities = [`Panelakk estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 1 à 2 couches selon rendu souhaité"];
     } else if (p === "peinture-interieure") {
       product = "Vegg & Tag 05";
       categoryUrl = productLinks.kormatekVeggTag;
-      explanation = "Pour murs et plafonds intérieurs, Vegg & Tag 05 est une peinture murale mate à base d’eau avec bon pouvoir couvrant.";
+      explanation = "Pour murs et plafonds intérieurs, Vegg & Tag 05 est une peinture murale mate à base d’eau.";
       products = ["Vegg & Tag 05", "Rouleau murs/plafonds", "Brosse à rechampir", "Adhésif de masquage", "Bâche de protection"];
-      warning = "Sur support taché, farinant ou très poreux, prévoyez une préparation ou impression adaptée avant finition.";
+      warning = "Sur support taché, farinant ou très poreux, prévoyez une préparation adaptée.";
       quantities = [`Peinture murale estimée : ${formatNumber((surface / 10) * 2)} L pour 2 couches`];
     } else if (p === "sol-bois-transparent") {
       product = "Trestjerner Gulvlakk";
       categoryUrl = productLinks.kormatekGulvlakk;
       explanation = "Pour parquet, escalier ou sol bois intérieur avec finition transparente résistante, Trestjerner Gulvlakk est la solution vernis.";
       products = ["Trestjerner Gulvlakk", "Abrasifs", "Rouleau/laqueur", "Dépoussiérage soigneux", "Protection de chantier"];
-      warning = "Sur ancien vernis, poncez et vérifiez l’adhérence avant d’appliquer une nouvelle finition.";
-      quantities = [`Vernis estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 2 à 3 couches selon sollicitation du sol"];
+      warning = "Sur ancien vernis, poncez et vérifiez l’adhérence.";
+      quantities = [`Vernis estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 2 à 3 couches selon sollicitation"];
     } else if (p === "sol-beton-transparent") {
       product = "Trestjerner Betongolje";
       categoryUrl = productLinks.kormatekBetongolje;
       explanation = "Pour sol béton, dalle poreuse, terre cuite, OSB ou Fermacell avec protection transparente, Trestjerner Betongolje fixe les poussières et bouche les pores.";
       products = ["Trestjerner Betongolje", "Nettoyant / dégraissant", "Rouleau sol", "Aspirateur / dépoussiérage", "Gants"];
-      warning = "Le béton doit être propre, sec, poreux et parfaitement dépoussiéré avant application.";
-      quantities = [`Saturateur béton estimé : ${formatNumber(surface / 8)} L par couche`, "Consommation variable selon porosité du support"];
+      warning = "Le béton doit être propre, sec, poreux et parfaitement dépoussiéré.";
+      quantities = [`Saturateur béton estimé : ${formatNumber(surface / 8)} L par couche`, "Consommation variable selon porosité"];
     } else if (p === "sol-interieur-opaque") {
       product = "Trestjerner Gulvmaling";
       categoryUrl = productLinks.kormatekGulvmaling;
-      explanation = "Pour un sol intérieur en bois ou béton avec finition couvrante, Trestjerner Gulvmaling est une peinture dure adaptée aux sols et ouvrages sollicités.";
+      explanation = "Pour un sol intérieur en bois ou béton avec finition couvrante, Trestjerner Gulvmaling est une peinture dure adaptée aux sols.";
       products = ["Trestjerner Gulvmaling", "Nettoyant / dégraissant", "Abrasifs", "Rouleau sol", "Adhésif de masquage"];
       warning = "Sur sol déjà peint ou verni, vérifiez l’adhérence et poncez avant application.";
       quantities = [`Peinture sol estimée : ${formatNumber((surface / 8) * 2)} L pour 2 couches`];
     } else {
       product = "Sélection Kormatek Bois & Déco";
       categoryUrl = productLinks.kormatekHome;
-      explanation = "Votre projet peut être orienté vers la protection bois, la peinture décorative intérieure ou les peintures de sol selon le support.";
       products = ["Préparation du support", "Produit de finition adapté", "Brosse / rouleau", "Abrasifs"];
       quantities = [`Estimation générale : ${formatNumber(surface / 8)} L par couche`];
     }
@@ -336,6 +330,7 @@ export default function Home() {
         if (!["project", "level", "surface"].includes(k)) delete next[k];
       });
       if (value === "bois") next.support = "bois";
+      setStep(0);
     }
     setAnswers(next);
   }
@@ -353,15 +348,14 @@ export default function Home() {
     setSubmitStatus("");
   }
 
-
   function encodeFormData(data) {
     return new URLSearchParams(data).toString();
   }
 
   async function handleLeadSubmit(event) {
     event.preventDefault();
-
     const form = event.currentTarget;
+
     const payload = {
       "form-name": "diagnostic-quai-west",
       "bot-field": "",
@@ -394,34 +388,12 @@ export default function Home() {
         body: encodeFormData(payload)
       });
 
-      if (!response.ok) {
-        throw new Error("Erreur Netlify Forms");
-      }
+      if (!response.ok) throw new Error("Erreur Netlify Forms");
 
       setSubmitStatus("Diagnostic envoyé avec succès.");
       form.reset();
     } catch (error) {
       console.error(error);
-      setSubmitStatus("Erreur lors de l’envoi. Vérifiez Netlify Forms ou réessayez.");
-    }
-  }
-
-    setSubmitStatus("Envoi en cours...");
-
-    try {
-      const response = await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encodeFormData(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error("Erreur Netlify Forms");
-      }
-
-      setSubmitStatus("Diagnostic envoyé avec succès.");
-      form.reset();
-    } catch (error) {
       setSubmitStatus("Erreur lors de l’envoi. Vérifiez Netlify Forms ou réessayez.");
     }
   }
@@ -432,10 +404,7 @@ export default function Home() {
         <section className="hero">
           <div className="badge">Assistant technique Quai West + Kormatek</div>
           <h1>Trouvez le bon produit, la bonne quantité et les bons accessoires en moins de 2 minutes.</h1>
-          <p>
-            Réparation bateau, surf, moulage, peinture carrosserie, stratification,
-            rénovation bois, terrasse, sol intérieur, béton ou peinture décorative.
-          </p>
+          <p>Réparation bateau, surf, moulage, peinture carrosserie, stratification, rénovation bois, terrasse, sol intérieur, béton ou peinture décorative.</p>
           <div className="heroActions">
             <button className="primary" onClick={() => setStarted(true)}>Démarrer mon diagnostic</button>
             <a className="secondary" href={productLinks.boutique} target="_blank">Voir Quai West</a>
@@ -503,19 +472,6 @@ export default function Home() {
             <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
               <input type="hidden" name="form-name" value="diagnostic-quai-west" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
-              <input type="hidden" name="marque" value={result.brand} />
-              <input type="hidden" name="projet" value={labelFor("project", answers.project)} />
-              <input type="hidden" name="projet_kormatek" value={labelFor("kormatekProject", answers.kormatekProject)} />
-              <input type="hidden" name="etat_kormatek" value={labelFor("kormatekState", answers.kormatekState)} />
-              <input type="hidden" name="rendu_kormatek" value={labelFor("kormatekFinish", answers.kormatekFinish)} />
-              <input type="hidden" name="surface" value={`${result.surface} m²`} />
-              <input type="hidden" name="support" value={labelFor("support", answers.support)} />
-              <input type="hidden" name="niveau" value={labelFor("level", answers.level)} />
-              <input type="hidden" name="priorite" value={labelFor("priority", answers.priority)} />
-              <input type="hidden" name="produit_recommande" value={result.product} />
-              <input type="hidden" name="quantites" value={(result.quantities || []).join(" | ")} />
-              <input type="hidden" name="panier_conseille" value={(result.products || []).join(" | ")} />
-              <input type="hidden" name="erreur_a_eviter" value={result.warning} />
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
               <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>

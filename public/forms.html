@@ -1,17 +1,10 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <title>Détection formulaire Netlify</title>
-  </head>
+  <head><meta charset="utf-8" /><title>Détection formulaire Netlify</title></head>
   <body>
-    <!-- Formulaire statique utilisé uniquement pour que Netlify détecte tous les champs au build -->
     <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success.html">
       <input type="hidden" name="form-name" value="diagnostic-quai-west" />
-      <p style="display:none">
-        <label>Ne pas remplir : <input name="bot-field" /></label>
-      </p>
-
+      <p style="display:none"><label>Ne pas remplir : <input name="bot-field" /></label></p>
       <input name="marque" />
       <input name="projet" />
       <input name="projet_kormatek" />
