@@ -321,6 +321,7 @@ export default function Home() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({ surface: "1" });
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState("");
 
   const questions = useMemo(() => getQuestions(answers), [answers]);
   const current = questions[step];
@@ -349,6 +350,44 @@ export default function Home() {
     setStep(0);
     setAnswers({ surface: "1" });
     setShowLeadForm(false);
+    setSubmitStatus("");
+  }
+
+
+  function encodeFormData(data) {
+    return Object.keys(data)
+      .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key] ?? "")}`)
+      .join("&");
+  }
+
+  async function handleLeadSubmit(event) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    if (!payload.optin) {
+      payload.optin = "non";
+    }
+
+    setSubmitStatus("Envoi en cours...");
+
+    try {
+      const response = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: encodeFormData(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur Netlify Forms");
+      }
+
+      setSubmitStatus("Diagnostic envoyé avec succès.");
+      form.reset();
+    } catch (error) {
+      setSubmitStatus("Erreur lors de l’envoi. Vérifiez Netlify Forms ou réessayez.");
+    }
   }
 
   if (!started) {
@@ -425,7 +464,7 @@ export default function Home() {
         {showLeadForm && (
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
-            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success.html" className="leadForm">
+            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
               <input type="hidden" name="form-name" value="diagnostic-quai-west" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <input type="hidden" name="marque" value={result.brand} />
@@ -442,8 +481,9 @@ export default function Home() {
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
               <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>
               <label>Commentaire<textarea name="commentaire" rows="4" placeholder="Précisez votre projet"></textarea></label>
-              <label className="checkbox"><input type="checkbox" name="optin" /> J’accepte de recevoir des conseils techniques et offres.</label>
+              <label className="checkbox"><input type="checkbox" name="optin" value="oui" /> J’accepte de recevoir des conseils techniques et offres.</label>
               <button className="primary" type="submit">Envoyer mon diagnostic</button>
+              {submitStatus && <p className="formStatus">{submitStatus}</p>}
             </form>
           </section>
         )}

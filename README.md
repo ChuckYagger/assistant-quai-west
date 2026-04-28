@@ -71,3 +71,17 @@ Produits intégrés :
 - Trestjerner Gulvlakk
 - Trestjerner Betongolje
 - Trestjerner Gulvmaling
+
+
+## Version V3 - Correction envoi Netlify Forms
+
+Cette version utilise un envoi AJAX en `application/x-www-form-urlencoded`, recommandé pour les formulaires React/Next.js avec Netlify Forms.
+
+Le formulaire HTML statique reste dans `public/forms.html` pour la détection au build.
+Le formulaire visible envoie maintenant les champs via `fetch("/")`.
+
+Après déploiement :
+1. Faire un hard refresh du site
+2. Remplir un diagnostic
+3. Envoyer le formulaire
+4. Vérifier dans Netlify > Forms > diagnostic-quai-west > Submissions
