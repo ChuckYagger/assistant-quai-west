@@ -34,3 +34,15 @@ Puis ouvrir : http://localhost:3000
 ## Modifier les liens produits
 
 Ouvrir `app/page.js`, puis modifier l'objet `productLinks`.
+
+
+## Correction Netlify Forms
+
+Cette version force la détection du formulaire avec :
+
+- `public/forms.html` : formulaire HTML statique détectable par Netlify
+- `public/success.html` : page de confirmation après envoi
+- formulaire React avec `method="POST"`, `data-netlify="true"`, `form-name` et `action="/success.html"`
+
+Après déploiement, vérifier dans Netlify :
+Site > Forms > diagnostic-quai-west

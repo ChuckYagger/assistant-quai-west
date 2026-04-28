@@ -284,22 +284,7 @@ export default function Home() {
   }
 
   if (!started) {
-   return (
-  <>
-    <form name="diagnostic-quai-west" data-netlify="true" hidden>
-      <input type="hidden" name="form-name" value="diagnostic-quai-west" />
-      <input name="marque" />
-      <input name="projet" />
-      <input name="surface" />
-      <input name="produit_recommande" />
-      <input name="prenom" />
-      <input name="email" />
-      <input name="telephone" />
-      <textarea name="commentaire"></textarea>
-      <input name="optin" />
-    </form>
-
-    <main className="page">
+    return (
       <main className="page">
         <section className="hero">
           <div className="badge">Assistant technique Quai West</div>
@@ -316,7 +301,6 @@ export default function Home() {
           <div className="trust"><span>✓ Calcul quantité</span><span>✓ Panier conseillé</span><span>✓ Erreurs à éviter</span></div>
         </section>
       </main>
-  </>
     );
   }
 
@@ -365,11 +349,15 @@ export default function Home() {
         {showLeadForm && (
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
-            <form name="diagnostic-quai-west" method="POST" data-netlify="true" className="leadForm">
+            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success.html" className="leadForm">
               <input type="hidden" name="form-name" value="diagnostic-quai-west" />
+              <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <input type="hidden" name="marque" value={result.brand} />
               <input type="hidden" name="projet" value={labelFor("project", answers.project)} />
               <input type="hidden" name="surface" value={`${result.surface} m²`} />
+              <input type="hidden" name="support" value={labelFor("support", answers.support)} />
+              <input type="hidden" name="niveau" value={labelFor("level", answers.level)} />
+              <input type="hidden" name="priorite" value={labelFor("priority", answers.priority)} />
               <input type="hidden" name="produit_recommande" value={result.product} />
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
