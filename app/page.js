@@ -167,6 +167,22 @@ function getQuestions(answers) {
       return q;
     });
 
+  // Tunnel optimisé : pas de question "objectif" quand l'intention est déjà claire.
+  if (["bateau", "surf", "carrosserie"].includes(answers.project)) {
+    filteredBase = filteredBase.filter(q => q.key !== "goal");
+  }
+
+  // Le support est inutile pour la carrosserie dans cette V10 : on est déjà sur peinture carrosserie.
+  if (answers.project === "carrosserie") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
+
+  // Pour le surf, on garde la question spécifique "Votre planche est : polyester / époxy",
+  // donc la question support générale est supprimée.
+  if (answers.project === "surf") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
+
   if (answers.project === "moulage") {
     filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
   }
@@ -504,6 +520,12 @@ export default function Home() {
       });
       if (value === "bois") next.support = "bois";
       if (value === "piscine") next.support = "beton";
+      if (value === "bateau") next.goal = "reparer";
+      if (value === "surf") next.goal = "reparer";
+      if (value === "carrosserie") {
+        next.goal = "peindre";
+        next.support = "ancienne-peinture";
+      }
       setStep(0);
     }
     setAnswers(next);
@@ -629,6 +651,8 @@ export default function Home() {
             <h2>Votre diagnostic</h2>
             <ul className="cleanList">
               <li><strong>Projet :</strong> {labelFor("project", answers.project)}</li>
+              {["bateau", "surf"].includes(answers.project) && <li><strong>Objectif déduit :</strong> Réparation</li>}
+              {answers.project === "carrosserie" && <li><strong>Objectif déduit :</strong> Peinture / finition</li>}
               {answers.project === "bois" ? (
                 <>
                   <li><strong>Projet Kormatek :</strong> {labelFor("kormatekProject", answers.kormatekProject)}</li>
@@ -724,6 +748,11 @@ export default function Home() {
             .filter(Boolean)
             .join(" → ")}
         </div>
+        {["bateau", "surf", "carrosserie"].includes(answers.project) && step === 1 && (
+          <p className="helperText">
+            Parcours raccourci : nous évitons les questions redondantes et utilisons directement votre choix de projet pour orienter la recommandation.
+          </p>
+        )}
         <h1>{current.title}</h1>
 
         {current.type === "cards" && (

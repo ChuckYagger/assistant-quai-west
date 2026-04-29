@@ -43,3 +43,13 @@ Le calcul reprend :
 - Le niveau est maintenant optionnel dans le formulaire final.
 - Ajout d’un bloc "Conseil Quai West" pour améliorer la conversion.
 - Objectif : raccourcir le tunnel tout en gardant la segmentation lead.
+
+
+## V10 - Tunnel optimisé bateau / surf / carrosserie
+
+Optimisations :
+- Bateau : suppression de la question "objectif", car l’utilisateur a déjà choisi réparation coque.
+- Surf : suppression de la question "objectif" et du support général ; on garde uniquement le type de planche.
+- Carrosserie : suppression de la question "objectif" et du support général ; on va directement vers la finition.
+- Objectifs déduits automatiquement dans le résultat.
+- Moins d’étapes, moins de friction, tunnel plus orienté conversion.
