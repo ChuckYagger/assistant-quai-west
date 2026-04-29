@@ -10,7 +10,9 @@ const productLinks = {
   resinePolyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
   gelcoat: "https://boutique.quai-west-composites.fr/11-gel-coat",
   gelcoatPolyester: "https://boutique.quai-west-composites.fr/12-gel-coat-polyester",
+  polyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
   catalyseur: "https://boutique.quai-west-composites.fr/adjuvants/136-catalyseur-polyester.html",
+  epoxy: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+epoxy",
 
   // Surf
   kitSurfPolyester: "https://boutique.quai-west-composites.fr/resines/16-kit-polyester-incolore-surf-81833531749.html",
@@ -29,6 +31,7 @@ const productLinks = {
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
+  kormatekExterior: "https://www.kormatek-boisetdeco.fr/",
   kormatekTerrasse: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
   kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
@@ -478,37 +481,36 @@ function recommend(answers) {
   let brand = "Quai West";
   let resultSurface = surface;
   const smartOffer = getSmartOffer(answers);
-
 if (answers.project === "bateau") {
   title = "Réparation bateau / coque";
 
   if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
     product = "Gelcoat polyester de réparation";
     categoryUrl = productLinks.gelcoatPolyester;
-    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition gelcoat polyester adaptée permet de retrouver une surface propre et protégée.";
+    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition adaptée permet de retrouver une surface propre.";
     products = [
       "Gelcoat polyester",
-      "Catalyseur polyester",
+      "Catalyseur",
       "Abrasifs",
       "Acétone",
       "Pinceaux",
-      "Polish de finition"
+      "Polish"
     ];
   } else {
     product = "Kit réparation polyester";
     categoryUrl = productLinks.kitReparationPolyester;
-    explanation = "Pour une coque polyester, une réparation avec résine polyester, renfort fibre et catalyseur permet de retrouver solidité et étanchéité.";
+    explanation = "Pour une coque polyester, une réparation avec résine et fibre permet de retrouver solidité et étanchéité.";
     products = [
       "Kit réparation polyester",
       "Mat de verre",
-      "Catalyseur polyester",
+      "Catalyseur",
       "Rouleau débulleur",
       "Acétone",
       "Gants"
     ];
   }
 
-  warning = "Ne stratifiez jamais sur un support humide, gras ou insuffisamment poncé.";
+  warning = "Ne stratifiez jamais sur un support humide ou mal préparé.";
 
   const resinKg = surface * 2 * 0.8;
   quantities = [
