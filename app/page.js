@@ -35,11 +35,6 @@ const projectOptions = [
 
 const baseQuestions = [
   { key: "project", title: "Quel est votre projet principal ?", type: "cards", options: projectOptions },
-  { key: "level", title: "Quel est votre niveau ?", type: "cards", options: [
-    { value: "debutant", label: "Débutant" },
-    { value: "confirme", label: "Bricoleur confirmé" },
-    { value: "pro", label: "Professionnel" }
-  ]},
   { key: "surface", title: "Quelle surface souhaitez-vous traiter ?", type: "surface" },
   { key: "support", title: "Quel est le support principal ?", type: "cards", skipFor: ["bois", "moulage", "piscine"], options: [
     { value: "polyester", label: "Polyester" },
@@ -505,7 +500,7 @@ export default function Home() {
     const next = { ...answers, [key]: value };
     if (key === "project") {
       Object.keys(next).forEach(k => {
-        if (!["project", "level", "surface"].includes(k)) delete next[k];
+        if (!["project", "surface"].includes(k)) delete next[k];
       });
       if (value === "bois") next.support = "bois";
       if (value === "piscine") next.support = "beton";
@@ -550,7 +545,7 @@ export default function Home() {
       rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish),
       support: labelFor("support", answers.support),
       surface: `${formatNumber(result.surface)} m²`,
-      niveau: labelFor("level", answers.level),
+      niveau: form.niveau?.value || "Non renseigné",
       priorite: labelFor("priority", answers.priority),
       produit_recommande: result.product || "",
       forme_piscine: labelFor("poolShape", answers.poolShape),
@@ -594,7 +589,7 @@ export default function Home() {
       <main className="page">
         <section className="hero">
           <div className="badge">Assistant technique Quai West + Kormatek</div>
-          <h1>Trouvez le bon produit, la bonne quantité et les bons accessoires en moins de 2 minutes.</h1>
+          <h1>Trouvez le bon produit, la bonne quantité et les bons accessoires en moins de 90 secondes.</h1>
           <p>
             Réparation bateau, surf, moulage, peinture carrosserie, stratification, rénovation bois, terrasse,
             sol intérieur, béton ou remplacement liner piscine par stratification polyester.
@@ -656,7 +651,6 @@ export default function Home() {
                 <li><strong>Support :</strong> {labelFor("support", answers.support)}</li>
               )}
               <li><strong>Surface :</strong> {formatNumber(result.surface)} m²</li>
-              <li><strong>Niveau :</strong> {labelFor("level", answers.level)}</li>
               <li><strong>Priorité :</strong> {labelFor("priority", answers.priority)}</li>
             </ul>
           </article>
@@ -672,9 +666,17 @@ export default function Home() {
           <article className="card"><h2>Panier conseillé</h2><ul className="pillList">{result.products.map((p, i) => <li key={i}>{p}</li>)}</ul></article>
           <article className="card warning"><h2>Erreur à éviter</h2><p>{result.warning}</p></article>
 
-          <article className="card">
-            <h2>Recevoir le diagnostic</h2>
-            <p>Envoyez le diagnostic pour être recontacté ou conserver la recommandation.</p>
+          <article className="card conversionCard">
+            <h2>Conseil Quai West</h2>
+            <p>
+              Pour éviter les erreurs de compatibilité, de dosage ou de quantité, envoyez votre diagnostic :
+              l’équipe pourra vérifier votre configuration avant commande.
+            </p>
+            <ul className="cleanList">
+              <li>✓ Validation du système produit</li>
+              <li>✓ Ajustement des quantités</li>
+              <li>✓ Conseil selon votre niveau réel</li>
+            </ul>
             <button className="secondary full" onClick={() => setShowLeadForm(!showLeadForm)}>Recevoir mon diagnostic par email</button>
           </article>
         </section>
@@ -688,6 +690,14 @@ export default function Home() {
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
               <label>Téléphone, facultatif<input name="telephone" placeholder="Votre téléphone" /></label>
+              <label>Votre niveau, facultatif
+                <select name="niveau" defaultValue="">
+                  <option value="">Choisir une option</option>
+                  <option value="Débutant">Débutant</option>
+                  <option value="Bricoleur confirmé">Bricoleur confirmé</option>
+                  <option value="Professionnel">Professionnel</option>
+                </select>
+              </label>
               <label>Commentaire<textarea name="commentaire" rows="4" placeholder="Précisez votre projet"></textarea></label>
               <label className="checkbox"><input type="checkbox" name="optin" value="oui" /> J’accepte de recevoir des conseils techniques et offres.</label>
               <button className="primary" type="submit">Envoyer mon diagnostic</button>

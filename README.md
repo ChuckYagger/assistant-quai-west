@@ -35,3 +35,11 @@ Le calcul reprend :
 
 - Parcours piscine direct : Projet → Forme du bassin → Dimensions → Résultat.
 - Texte d’aide ajouté sous la question de forme du bassin.
+
+
+## V9 - Niveau supprimé du parcours
+
+- La question "Quel est votre niveau ?" est supprimée du diagnostic.
+- Le niveau est maintenant optionnel dans le formulaire final.
+- Ajout d’un bloc "Conseil Quai West" pour améliorer la conversion.
+- Objectif : raccourcir le tunnel tout en gardant la segmentation lead.
