@@ -363,40 +363,24 @@ function estimateBasket(result, answers) {
   return { label, low: Math.max(Math.round(low), 15), high: Math.max(Math.round(high), 25), note };
 }
 function getSmartOffer(answers) {
- if (answers.project === "bateau") {
-  title = "Réparation bateau / coque";
+  if (answers.project === "bateau") {
+    if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
+      return {
+        main: "Gelcoat polyester de réparation",
+        url: productLinks.gelcoatPolyester,
+        upsell: "Kit finition gelcoat complet",
+        complements: ["Catalyseur", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
+      };
+    }
 
-  if (answers.boatIssue === "gelcoat") {
-    product = "Gelcoat polyester de réparation";
-    categoryUrl = productLinks.gelcoatPolyester;
-  } else if (answers.boatIssue === "fissure") {
-    product = "Gelcoat polyester de réparation";
-    categoryUrl = productLinks.gelcoatPolyester;
-  } else {
-    product = "Kit réparation polyester";
-    categoryUrl = productLinks.kitReparationPolyester;
+    return {
+      main: "Kit réparation polyester",
+      url: productLinks.kitReparationPolyester,
+      upsell: "Pack stratification complet",
+      complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Acétone", "Gants"]
+    };
   }
 
-  explanation = "Pour une coque polyester, une réparation adaptée avec résine + renfort permet de retrouver solidité et étanchéité.";
-
-  products = [
-    "Résine polyester",
-    "Catalyseur",
-    "Mat de verre",
-    "Acétone",
-    "Rouleaux / pinceaux",
-    "Gants"
-  ];
-
-  warning = "Ne stratifiez jamais sur un support humide ou mal préparé.";
-
-  const resinKg = surface * 2 * 0.8;
-  quantities = [
-    `Résine estimée : ${formatNumber(resinKg)} kg`,
-    `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
-    `Fibre : ${formatNumber(surface * 2)} m² environ`
-  ];
-}
   if (answers.project === "surf") {
     if (answers.surfBoard === "epoxy-eps") {
       return {
@@ -424,15 +408,6 @@ function getSmartOffer(answers) {
         url: productLinks.siliconeRTV,
         upsell: "Kit RTV complet",
         complements: ["Agent de démoulage", "Balance de précision", "Spatules", "Récipient", "Gants"]
-      };
-    }
-
-    if (answers.moldingNeed === "coulee") {
-      return {
-        main: "Résine époxy de coulée",
-        url: productLinks.epoxy,
-        upsell: "Kit coulée + pigments",
-        complements: ["Pigments", "Récipient", "Spatules", "Gants"]
       };
     }
 
@@ -480,7 +455,6 @@ function recommend(answers) {
   let quantities = [];
   let brand = "Quai West";
   let resultSurface = surface;
-  const smartOffer = getSmartOffer(answers);
 if (answers.project === "bateau") {
   title = "Réparation bateau / coque";
 
