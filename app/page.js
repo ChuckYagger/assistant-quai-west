@@ -360,42 +360,40 @@ function estimateBasket(result, answers) {
   return { label, low: Math.max(Math.round(low), 15), high: Math.max(Math.round(high), 25), note };
 }
 function getSmartOffer(answers) {
-  if (answers.project === "bateau") {
-    if (answers.boatIssue === "fissure") {
-      return {
-        main: "Gelcoat polyester de réparation",
-        url: productLinks.gelcoatPolyester,
-        upsell: "Kit finition gelcoat complet",
-        complements: ["Catalyseur polyester", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
-      };
-    }
+ if (answers.project === "bateau") {
+  title = "Réparation bateau / coque";
 
-    if (answers.boatIssue === "trou" || answers.boatIssue === "fragilisee") {
-      return {
-        main: "Kit réparation polyester",
-        url: productLinks.kitReparationPolyester,
-        upsell: "Pack stratification complet",
-        complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Gants", "Acétone"]
-      };
-    }
-
-    if (answers.boatIssue === "gelcoat") {
-      return {
-        main: "Gelcoat polyester",
-        url: productLinks.gelcoat,
-        upsell: "Kit reprise gelcoat + finition",
-        complements: ["Catalyseur", "Abrasifs fins", "Pinceaux", "Polish"]
-      };
-    }
-
-    return {
-      main: "Résine polyester + fibre",
-      url: productLinks.resinePolyester,
-      upsell: "Pack stratification pro",
-      complements: ["Mat de verre", "Catalyseur", "Débulleur", "Acétone"]
-    };
+  if (answers.boatIssue === "gelcoat") {
+    product = "Gelcoat polyester de réparation";
+    categoryUrl = productLinks.gelcoatPolyester;
+  } else if (answers.boatIssue === "fissure") {
+    product = "Gelcoat polyester de réparation";
+    categoryUrl = productLinks.gelcoatPolyester;
+  } else {
+    product = "Kit réparation polyester";
+    categoryUrl = productLinks.kitReparationPolyester;
   }
 
+  explanation = "Pour une coque polyester, une réparation adaptée avec résine + renfort permet de retrouver solidité et étanchéité.";
+
+  products = [
+    "Résine polyester",
+    "Catalyseur",
+    "Mat de verre",
+    "Acétone",
+    "Rouleaux / pinceaux",
+    "Gants"
+  ];
+
+  warning = "Ne stratifiez jamais sur un support humide ou mal préparé.";
+
+  const resinKg = surface * 2 * 0.8;
+  quantities = [
+    `Résine estimée : ${formatNumber(resinKg)} kg`,
+    `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
+    `Fibre : ${formatNumber(surface * 2)} m² environ`
+  ];
+}
   if (answers.project === "surf") {
     if (answers.surfBoard === "epoxy-eps") {
       return {
