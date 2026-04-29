@@ -479,22 +479,44 @@ function recommend(answers) {
   let resultSurface = surface;
   const smartOffer = getSmartOffer(answers);
 
-  if (answers.project === "bateau") {
-    title = "Réparation bateau / coque";
-      const smartOffer = getSmartOffer(answers);
+if (answers.project === "bateau") {
+  title = "Réparation bateau / coque";
 
-  product = smartOffer.main;
-  categoryUrl = smartOffer.url;
-  products = [smartOffer.upsell, ...smartOffer.complements];
-
-    product = answers.support === "epoxy" ? "Résine époxy + tissu de verre" : answers.boatIssue === "gelcoat" ? "Gelcoat / topcoat de finition" : "Kit de stratification polyester";
-    categoryUrl = answers.support === "epoxy" ? productLinks.epoxy : answers.boatIssue === "gelcoat" ? productLinks.gelcoat : productLinks.polyester;
-    explanation = answers.support === "epoxy" ? "Le support époxy demande une résine compatible pour garantir l’adhérence." : "Pour une coque polyester, résine polyester + mat de verre est souvent une solution efficace.";
-    products = ["Résine adaptée", "Catalyseur ou durcisseur", "Mat/tissu de verre", "Acétone ou nettoyant", "Pinceaux / rouleaux", "Gants nitrile"];
-    warning = "Ne stratifiez pas sur un support humide, gras ou insuffisamment poncé.";
-    const resinKg = surface * 2 * 0.8;
-    quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`, `Fibre : ${formatNumber(surface * 2)} m² environ`];
+  if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
+    product = "Gelcoat polyester de réparation";
+    categoryUrl = productLinks.gelcoatPolyester;
+    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition gelcoat polyester adaptée permet de retrouver une surface propre et protégée.";
+    products = [
+      "Gelcoat polyester",
+      "Catalyseur polyester",
+      "Abrasifs",
+      "Acétone",
+      "Pinceaux",
+      "Polish de finition"
+    ];
+  } else {
+    product = "Kit réparation polyester";
+    categoryUrl = productLinks.kitReparationPolyester;
+    explanation = "Pour une coque polyester, une réparation avec résine polyester, renfort fibre et catalyseur permet de retrouver solidité et étanchéité.";
+    products = [
+      "Kit réparation polyester",
+      "Mat de verre",
+      "Catalyseur polyester",
+      "Rouleau débulleur",
+      "Acétone",
+      "Gants"
+    ];
   }
+
+  warning = "Ne stratifiez jamais sur un support humide, gras ou insuffisamment poncé.";
+
+  const resinKg = surface * 2 * 0.8;
+  quantities = [
+    `Résine estimée : ${formatNumber(resinKg)} kg`,
+    `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
+    `Fibre : ${formatNumber(surface * 2)} m² environ`
+  ];
+}
 
 if (answers.project === "surf") {
   title = "Réparation planche de surf";
@@ -645,7 +667,9 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
     const resinKg = surface * 2 * 0.8;
     quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Renfort : ${formatNumber(surface * 2)} m² environ`];
   }
-
+if (!categoryUrl) {
+  categoryUrl = productLinks.boutique;
+}
   return { title, product, categoryUrl, explanation, products, warning, quantities, surface: resultSurface, brand };
 }
 
