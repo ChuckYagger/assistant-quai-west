@@ -359,7 +359,115 @@ function estimateBasket(result, answers) {
 
   return { label, low: Math.max(Math.round(low), 15), high: Math.max(Math.round(high), 25), note };
 }
+function getSmartOffer(answers) {
+  if (answers.project === "bateau") {
+    if (answers.boatIssue === "fissure") {
+      return {
+        main: "Gelcoat polyester de réparation",
+        url: productLinks.gelcoatPolyester,
+        upsell: "Kit finition gelcoat complet",
+        complements: ["Catalyseur polyester", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
+      };
+    }
 
+    if (answers.boatIssue === "trou" || answers.boatIssue === "fragilisee") {
+      return {
+        main: "Kit réparation polyester",
+        url: productLinks.kitReparationPolyester,
+        upsell: "Pack stratification complet",
+        complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Gants", "Acétone"]
+      };
+    }
+
+    if (answers.boatIssue === "gelcoat") {
+      return {
+        main: "Gelcoat polyester",
+        url: productLinks.gelcoat,
+        upsell: "Kit reprise gelcoat + finition",
+        complements: ["Catalyseur", "Abrasifs fins", "Pinceaux", "Polish"]
+      };
+    }
+
+    return {
+      main: "Résine polyester + fibre",
+      url: productLinks.resinePolyester,
+      upsell: "Pack stratification pro",
+      complements: ["Mat de verre", "Catalyseur", "Débulleur", "Acétone"]
+    };
+  }
+
+  if (answers.project === "surf") {
+    if (answers.surfBoard === "epoxy-eps") {
+      return {
+        main: "Kit résine époxy surf",
+        url: productLinks.kitSurfEpoxy,
+        upsell: "Kit époxy + tissu de verre",
+        complements: ["Tissu de verre fin", "Abrasifs", "Spatule", "Gants"]
+      };
+    }
+
+    return {
+      main: "Kit polyester surf",
+      url: productLinks.kitSurfPolyester,
+      upsell: "Kit réparation surf complet",
+      complements: ["Tissu de verre fin", "Papier abrasif", "Spatule", "Polish"]
+    };
+  }
+
+  if (answers.project === "moulage") {
+    const volume = getObjectVolumeLiters(answers);
+
+    if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed === "moule-souple" || volume <= 5) {
+      return {
+        main: "Silicone RTV de moulage",
+        url: productLinks.siliconeRTV,
+        upsell: "Kit RTV complet",
+        complements: ["Agent de démoulage", "Balance de précision", "Spatules", "Récipient", "Gants"]
+      };
+    }
+
+    if (answers.moldingNeed === "coulee") {
+      return {
+        main: "Résine époxy de coulée",
+        url: productLinks.epoxy,
+        upsell: "Kit coulée + pigments",
+        complements: ["Pigments", "Récipient", "Spatules", "Gants"]
+      };
+    }
+
+    return {
+      main: "Résine polyester + gelcoat de moulage",
+      url: productLinks.moulage,
+      upsell: "Pack tirage polyester complet",
+      complements: ["Gelcoat", "Fibre de verre", "Catalyseur", "Agent de démoulage"]
+    };
+  }
+
+  if (answers.project === "piscine") {
+    return {
+      main: "Système stratification piscine polyester",
+      url: productLinks.piscine,
+      upsell: "Pack piscine complet gros volume",
+      complements: ["Résine polyester ISO", "Mat 300", "Gelcoat Iso NPG", "Catalyseur", "Acétone", "Rouleaux débulleurs"]
+    };
+  }
+
+  if (answers.project === "carrosserie") {
+    return {
+      main: "Peinture polyuréthane carrosserie",
+      url: productLinks.peinture,
+      upsell: "Kit peinture complet avec durcisseur et diluant",
+      complements: ["Durcisseur", "Diluant", "Apprêt", "Dégraissant", "Abrasifs", "Masquage"]
+    };
+  }
+
+  return {
+    main: "Sélection technique Quai West",
+    url: productLinks.boutique,
+    upsell: "Pack conseillé",
+    complements: ["Accessoires", "Protection", "Préparation support"]
+  };
+}
 function recommend(answers) {
   const surface = Math.max(parseFloat(String(answers.surface || "1").replace(",", ".")) || 1, 0.1);
   let title = "Diagnostic technique personnalisé";
@@ -371,9 +479,16 @@ function recommend(answers) {
   let quantities = [];
   let brand = "Quai West";
   let resultSurface = surface;
+  const smartOffer = getSmartOffer(answers);
 
   if (answers.project === "bateau") {
     title = "Réparation bateau / coque";
+      const smartOffer = getSmartOffer(answers);
+
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
+
     product = answers.support === "epoxy" ? "Résine époxy + tissu de verre" : answers.boatIssue === "gelcoat" ? "Gelcoat / topcoat de finition" : "Kit de stratification polyester";
     categoryUrl = answers.support === "epoxy" ? productLinks.epoxy : answers.boatIssue === "gelcoat" ? productLinks.gelcoat : productLinks.polyester;
     explanation = answers.support === "epoxy" ? "Le support époxy demande une résine compatible pour garantir l’adhérence." : "Pour une coque polyester, résine polyester + mat de verre est souvent une solution efficace.";
@@ -386,21 +501,31 @@ function recommend(answers) {
 if (answers.project === "surf") {
   title = "Réparation planche de surf";
 
-  if (answers.surfBoard === "epoxy-eps") {
-    product = "Kit résine époxy surf";
-    categoryUrl = productLinks.kitSurfEpoxy;
-  } else {
-    product = "Kit résine polyester surf";
-    categoryUrl = productLinks.kitSurfPolyester;
-  }
-    explanation = product.includes("époxy") ? "Une planche EPS/époxy doit être réparée avec une résine époxy." : "Pour une planche polyester, une résine polyester adaptée au surf convient.";
-    products = ["Résine adaptée", "Tissu de verre fin", "Papier abrasif", "Spatule", "Gants", "Polish finition"];
-    warning = "N’utilisez pas de résine polyester sur une planche EPS/époxy.";
-    quantities = [`Résine estimée : ${formatNumber(Math.max(surface * 0.6, 0.15))} kg`, `Tissu de verre : ${formatNumber(surface * 1.3)} m² environ`];
-  }
+  const smartOffer = getSmartOffer(answers);
+
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
+
+  explanation = product.includes("époxy")
+    ? "Une planche EPS/époxy doit être réparée avec une résine époxy."
+    : "Pour une planche polyester, une résine polyester adaptée au surf convient.";
+
+  warning = "N’utilisez pas de résine polyester sur une planche EPS/époxy.";
+  quantities = [
+    `Résine estimée : ${formatNumber(Math.max(surface * 0.6, 0.15))} kg`,
+    `Tissu de verre : ${formatNumber(surface * 1.3)} m² environ`
+  ];
+}
 
   if (answers.project === "moulage") {
     title = "Moulage / fabrication de pièce";
+      const smartOffer = getSmartOffer(answers);
+
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
+
     const volume = getObjectVolumeLiters(answers);
 if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed === "moule-souple" || volume <= 5) {
   product = "Silicone RTV de moulage";
@@ -428,6 +553,12 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
 
   if (answers.project === "carrosserie") {
     title = "Peinture carrosserie";
+      const smartOffer = getSmartOffer(answers);
+
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
+
     product = answers.finish === "base-vernis" || answers.finish === "metalisee" ? "Base mate + vernis" : "Peinture polyuréthane brillant direct";
     categoryUrl = productLinks.peinture;
     explanation = product.includes("Base") ? "Les finitions métallisées nécessitent généralement une base couleur puis un vernis." : "Pour une couleur RAL unie, le brillant direct est efficace et résistant.";
