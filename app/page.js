@@ -4,17 +4,33 @@ import { useMemo, useState } from "react";
 
 const productLinks = {
   boutique: "https://boutique.quai-west-composites.fr",
-  polyester: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+polyester",
-  epoxy: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+epoxy",
-  gelcoat: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=gelcoat",
-  fibre: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=fibre+de+verre",
-  silicone: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=silicone+moulage",
+
+  // Bateau / coque
+  kitReparationPolyester: "https://boutique.quai-west-composites.fr/116-resine-kit",
+  resinePolyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
+  gelcoat: "https://boutique.quai-west-composites.fr/11-gel-coat",
+  gelcoatPolyester: "https://boutique.quai-west-composites.fr/12-gel-coat-polyester",
+  catalyseur: "https://boutique.quai-west-composites.fr/adjuvants/136-catalyseur-polyester.html",
+
+  // Surf
+  kitSurfPolyester: "https://boutique.quai-west-composites.fr/resines/16-kit-polyester-incolore-surf-81833531749.html",
+  kitSurfEpoxy: "https://boutique.quai-west-composites.fr/kit-de-resine-epoxy/28-surf-1070-81833531725.html",
+
+  // Moulage
+  moulage: "https://boutique.quai-west-composites.fr/40-moulage",
+  siliconeRTV: "https://boutique.quai-west-composites.fr/kit-rtv/354-kit-rtv-3481-elastomere-de-silicone.html",
+  kitRTV: "https://boutique.quai-west-composites.fr/148-kit-rtv",
+
+  // Piscine
+  piscine: "https://boutique.quai-west-composites.fr/369-piscine",
+
+  // Peinture / carrosserie
   peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
 
+  // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
-  kormatekExterior: "https://www.kormatek-boisetdeco.fr/11-protection-du-bois-exterieur",
+  kormatekTerrasse: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
-  kormatekTreolje: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
   kormatekPanelakk: "https://www.kormatek-boisetdeco.fr/protection-du-bois-interieur/25-panelakk-7029350139577.html",
   kormatekVeggTag: "https://www.kormatek-boisetdeco.fr/peinture-interieure-decorative/23-vegg-tag-05-7029350008156.html",
@@ -367,10 +383,16 @@ function recommend(answers) {
     quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`, `Fibre : ${formatNumber(surface * 2)} m² environ`];
   }
 
-  if (answers.project === "surf") {
-    title = "Réparation planche de surf";
-    product = answers.surfBoard === "epoxy-eps" || answers.support === "epoxy" ? "Kit résine époxy surf" : "Kit résine polyester surf";
-    categoryUrl = product.includes("époxy") ? productLinks.epoxy : productLinks.polyester;
+if (answers.project === "surf") {
+  title = "Réparation planche de surf";
+
+  if (answers.surfBoard === "epoxy-eps") {
+    product = "Kit résine époxy surf";
+    categoryUrl = productLinks.kitSurfEpoxy;
+  } else {
+    product = "Kit résine polyester surf";
+    categoryUrl = productLinks.kitSurfPolyester;
+  }
     explanation = product.includes("époxy") ? "Une planche EPS/époxy doit être réparée avec une résine époxy." : "Pour une planche polyester, une résine polyester adaptée au surf convient.";
     products = ["Résine adaptée", "Tissu de verre fin", "Papier abrasif", "Spatule", "Gants", "Polish finition"];
     warning = "N’utilisez pas de résine polyester sur une planche EPS/époxy.";
@@ -380,9 +402,9 @@ function recommend(answers) {
   if (answers.project === "moulage") {
     title = "Moulage / fabrication de pièce";
     const volume = getObjectVolumeLiters(answers);
-    if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed === "moule-souple" || volume <= 5) {
-      product = "Silicone RTV de moulage";
-      categoryUrl = productLinks.silicone;
+if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed === "moule-souple" || volume <= 5) {
+  product = "Silicone RTV de moulage";
+  categoryUrl = productLinks.siliconeRTV;
       products = ["Silicone RTV de moulage", "Agent de démoulage si nécessaire", "Balance de précision", "Spatules", "Récipient de mélange", "Gants"];
       explanation = "Chez Quai West, pour la reproduction d’objets de petite taille, nous conseillons d’utiliser un RTV silicone afin d’obtenir une bonne reproduction des détails et un démoulage facile.";
       warning = "Prévoyez un coffrage propre et étanche, avec une marge suffisante autour de l’objet.";
@@ -479,7 +501,7 @@ function recommend(answers) {
     const poolSurface = getPoolSurface(answers);
     resultSurface = poolSurface;
     product = "Système de stratification polyester pour piscine béton";
-    categoryUrl = productLinks.polyester;
+    categoryUrl = productLinks.piscine;
     explanation = "Pour remplacer un liner sur une piscine béton, l’assistant calcule la surface fond + parois puis liste les matériaux nécessaires selon la logique du devis Quai West.";
     products = getPoolMaterials(poolSurface);
     warning = "Le support béton doit être parfaitement préparé, sain, sec, poncé/dépoussiéré et compatible avant stratification.";
