@@ -27,7 +27,7 @@ const productLinks = {
   piscine: "https://boutique.quai-west-composites.fr/369-piscine",
 
   // Peinture / carrosserie
-  peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
+  peinture: "https://boutique.quai-west-composites.fr/345-peintures-polyurethanes-brillant-direct",
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
