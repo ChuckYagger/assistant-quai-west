@@ -10,9 +10,7 @@ const productLinks = {
   resinePolyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
   gelcoat: "https://boutique.quai-west-composites.fr/11-gel-coat",
   gelcoatPolyester: "https://boutique.quai-west-composites.fr/12-gel-coat-polyester",
-  polyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
   catalyseur: "https://boutique.quai-west-composites.fr/adjuvants/136-catalyseur-polyester.html",
-  epoxy: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=resine+epoxy",
 
   // Surf
   kitSurfPolyester: "https://boutique.quai-west-composites.fr/resines/16-kit-polyester-incolore-surf-81833531749.html",
@@ -27,15 +25,10 @@ const productLinks = {
   piscine: "https://boutique.quai-west-composites.fr/369-piscine",
 
   // Peinture / carrosserie
-  peinture: "https://boutique.quai-west-composites.fr/371-peinture-industrielle",
-  peintureBrillantDirect: "https://boutique.quai-west-composites.fr/345-peintures-polyurethanes-brillant-direct",
-  peintureKitMat: "https://boutique.quai-west-composites.fr/364-peinture-industrielle-mat-en-kit",
-  peintureKitSatinee: "https://boutique.quai-west-composites.fr/363-peinture-industrielle-satinee-en-kit",
-  peintureKitBrillant: "https://boutique.quai-west-composites.fr/362-peinture-industrielle-brillant-en-kit",
+  peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
-  kormatekExterior: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur",
   kormatekTerrasse: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
   kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
@@ -121,13 +114,13 @@ const specificQuestions = {
     ]},
     { key: "dimensions", title: "Quelle est la taille de votre objet ?", type: "dimensions" }
   ],
-carrosserie: [
-  { key: "finish", title: "Quelle finition souhaitez-vous ?", type: "cards", options: [
-    { value: "kit-brillant-direct-ral", label: "Kit Brillant Direct RAL" },
-    { value: "kit-peinture-brillant", label: "Kit Peinture Brillant" },
-    { value: "kit-peinture-mat", label: "Kit Peinture Mat" },
-    { value: "kit-peinture-satinee", label: "Kit Peinture Satinée" },
-    { value: "inconnu", label: "Je ne sais pas" }
+  carrosserie: [
+    { key: "finish", title: "Finition souhaitée :", type: "cards", options: [
+      { value: "brillant-direct", label: "Brillant direct" },
+      { value: "base-vernis", label: "Base mate + vernis" },
+      { value: "metalisee", label: "Métallisée" },
+      { value: "ral", label: "RAL couleur unie" },
+      { value: "inconnu", label: "Je ne sais pas" }
     ]}
   ],
   bois: [
@@ -191,7 +184,7 @@ function getQuestions(answers) {
     });
 
   // Tunnel optimisé : pas de question "objectif" quand l'intention est déjà claire.
-  if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
+  if (["bateau", "surf", "carrosserie"].includes(answers.project)) {
     filteredBase = filteredBase.filter(q => q.key !== "goal");
   }
 
@@ -206,27 +199,8 @@ function getQuestions(answers) {
     filteredBase = filteredBase.filter(q => q.key !== "support");
   }
 
-  // Pour le bois/Kormatek, on ne pose pas la question support générale.
-  if (answers.project === "bois") {
-    filteredBase = filteredBase.filter(q => q.key !== "support");
-  }
-
   if (answers.project === "moulage") {
     filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
-  }
-
-  if (answers.project === "bois" && answers.kormatekProject === "terrasse-exterieure") {
-    const boisQuestions = specificQuestions.bois.map(q => {
-      if (q.key === "kormatekState") {
-        return {
-          ...q,
-          options: q.options.filter(opt => opt.value !== "poussiereux")
-        };
-      }
-      return q;
-    });
-
-    return [...filteredBase, ...boisQuestions];
   }
 
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
@@ -386,24 +360,40 @@ function estimateBasket(result, answers) {
   return { label, low: Math.max(Math.round(low), 15), high: Math.max(Math.round(high), 25), note };
 }
 function getSmartOffer(answers) {
-  if (answers.project === "bateau") {
-    if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
-      return {
-        main: "Gelcoat polyester de réparation",
-        url: productLinks.gelcoatPolyester,
-        upsell: "Kit finition gelcoat complet",
-        complements: ["Catalyseur", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
-      };
-    }
+ if (answers.project === "bateau") {
+  title = "Réparation bateau / coque";
 
-    return {
-      main: "Kit réparation polyester",
-      url: productLinks.kitReparationPolyester,
-      upsell: "Pack stratification complet",
-      complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Acétone", "Gants"]
-    };
+  if (answers.boatIssue === "gelcoat") {
+    product = "Gelcoat polyester de réparation";
+    categoryUrl = productLinks.gelcoatPolyester;
+  } else if (answers.boatIssue === "fissure") {
+    product = "Gelcoat polyester de réparation";
+    categoryUrl = productLinks.gelcoatPolyester;
+  } else {
+    product = "Kit réparation polyester";
+    categoryUrl = productLinks.kitReparationPolyester;
   }
 
+  explanation = "Pour une coque polyester, une réparation adaptée avec résine + renfort permet de retrouver solidité et étanchéité.";
+
+  products = [
+    "Résine polyester",
+    "Catalyseur",
+    "Mat de verre",
+    "Acétone",
+    "Rouleaux / pinceaux",
+    "Gants"
+  ];
+
+  warning = "Ne stratifiez jamais sur un support humide ou mal préparé.";
+
+  const resinKg = surface * 2 * 0.8;
+  quantities = [
+    `Résine estimée : ${formatNumber(resinKg)} kg`,
+    `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
+    `Fibre : ${formatNumber(surface * 2)} m² environ`
+  ];
+}
   if (answers.project === "surf") {
     if (answers.surfBoard === "epoxy-eps") {
       return {
@@ -431,6 +421,15 @@ function getSmartOffer(answers) {
         url: productLinks.siliconeRTV,
         upsell: "Kit RTV complet",
         complements: ["Agent de démoulage", "Balance de précision", "Spatules", "Récipient", "Gants"]
+      };
+    }
+
+    if (answers.moldingNeed === "coulee") {
+      return {
+        main: "Résine époxy de coulée",
+        url: productLinks.epoxy,
+        upsell: "Kit coulée + pigments",
+        complements: ["Pigments", "Récipient", "Spatules", "Gants"]
       };
     }
 
@@ -478,36 +477,38 @@ function recommend(answers) {
   let quantities = [];
   let brand = "Quai West";
   let resultSurface = surface;
+  const smartOffer = getSmartOffer(answers);
+
 if (answers.project === "bateau") {
   title = "Réparation bateau / coque";
 
   if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
     product = "Gelcoat polyester de réparation";
     categoryUrl = productLinks.gelcoatPolyester;
-    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition adaptée permet de retrouver une surface propre.";
+    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition gelcoat polyester adaptée permet de retrouver une surface propre et protégée.";
     products = [
       "Gelcoat polyester",
-      "Catalyseur",
+      "Catalyseur polyester",
       "Abrasifs",
       "Acétone",
       "Pinceaux",
-      "Polish"
+      "Polish de finition"
     ];
   } else {
     product = "Kit réparation polyester";
     categoryUrl = productLinks.kitReparationPolyester;
-    explanation = "Pour une coque polyester, une réparation avec résine et fibre permet de retrouver solidité et étanchéité.";
+    explanation = "Pour une coque polyester, une réparation avec résine polyester, renfort fibre et catalyseur permet de retrouver solidité et étanchéité.";
     products = [
       "Kit réparation polyester",
       "Mat de verre",
-      "Catalyseur",
+      "Catalyseur polyester",
       "Rouleau débulleur",
       "Acétone",
       "Gants"
     ];
   }
 
-  warning = "Ne stratifiez jamais sur un support humide ou mal préparé.";
+  warning = "Ne stratifiez jamais sur un support humide, gras ou insuffisamment poncé.";
 
   const resinKg = surface * 2 * 0.8;
   quantities = [
@@ -571,163 +572,79 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
   }
 
   if (answers.project === "carrosserie") {
-  title = "Peinture carrosserie";
+    title = "Peinture carrosserie";
+      const smartOffer = getSmartOffer(answers);
 
-  if (answers.finish === "kit-brillant-direct-ral") {
-    product = "Kit Brillant Direct RAL";
-    categoryUrl = productLinks.peintureBrillantDirect;
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
 
-  } else if (answers.finish === "kit-peinture-brillant") {
-    product = "Kit Peinture Brillant";
-    categoryUrl = productLinks.peintureKitBrillant;
-
-  } else if (answers.finish === "kit-peinture-mat") {
-    product = "Kit Peinture Mat";
-    categoryUrl = productLinks.peintureKitMat;
-
-  } else if (answers.finish === "kit-peinture-satinee") {
-    product = "Kit Peinture Satinée";
-    categoryUrl = productLinks.peintureKitSatinee;
-
-  } else {
-    product = "Kit peinture carrosserie";
-    categoryUrl = productLinks.peintureBrillantDirect;
+    product = answers.finish === "base-vernis" || answers.finish === "metalisee" ? "Base mate + vernis" : "Peinture polyuréthane brillant direct";
+    categoryUrl = productLinks.peinture;
+    explanation = product.includes("Base") ? "Les finitions métallisées nécessitent généralement une base couleur puis un vernis." : "Pour une couleur RAL unie, le brillant direct est efficace et résistant.";
+    products = ["Peinture", "Durcisseur", "Diluant", "Apprêt si nécessaire", "Dégraissant", "Abrasifs", "Masquage"];
+    warning = "Ne peignez jamais sur un support mal dégraissé ou insuffisamment poncé.";
+    quantities = [`Peinture estimée : ${formatNumber((surface / 9) * 2)} L pour 2 couches`, "Prévoir durcisseur et diluant selon fiche technique"];
   }
 
-  explanation = "Tous les kits sont fournis avec la base, le diluant et le durcisseur pour une application simplifiée.";
+  if (answers.project === "bois") {
+    brand = "Kormatek Bois & Déco";
+    title = "Diagnostic Kormatek Bois & Déco";
+    const p = answers.kormatekProject;
+    const s = answers.kormatekState;
+    const f = answers.kormatekFinish;
 
-  products = [
-    product,
-    "Base peinture",
-    "Diluant",
-    "Durcisseur",
-    "Apprêt",
-    "Dégraissant",
-    "Abrasifs",
-    "Masquage"
-  ];
-
-  warning = "Une mauvaise préparation du support est la première cause d’échec en peinture carrosserie.";
-
-  quantities = [
-    `Kit peinture estimé : ${formatNumber((surface / 9) * 2)} L pour 2 couches`,
-    "Base + diluant + durcisseur inclus"
-  ];
-}
-if (answers.project === "bois") {
-  brand = "Kormatek Bois & Déco";
-  title = "Diagnostic Kormatek Bois & Déco";
-
-  const p = answers.kormatekProject;
-  const s = answers.kormatekState;
-  const f = answers.kormatekFinish;
-
-  if (p === "terrasse-exterieure" && (s === "grise" || s === "sale")) {
-    product = "Demidekk Terrassfix + Treolje";
-    categoryUrl = productLinks.kormatekTerrassfix;
-    explanation = "Pour une terrasse grisée, tachée ou noircie, commencez par nettoyer/dégriser avec Demidekk Terrassfix, puis protégez avec Treolje.";
-    products = ["Demidekk Terrassfix", "Treolje", "Brosse terrasse", "Abrasifs si nécessaire", "Gants"];
-    warning = "Ne saturez pas une terrasse encore grisée, sale ou humide : le bois doit être propre, sec et ouvert avant protection.";
-    quantities = [
-      `Nettoyant/dégriseur : prévoir selon encrassement`,
-      `Treolje estimé : ${formatNumber(surface / 8)} L par couche`
-    ];
-
-  } else if (p === "terrasse-exterieure") {
-    product = "Treolje";
-    categoryUrl = productLinks.kormatekTerrasse;
-    explanation = "Pour protéger une terrasse bois extérieure, Treolje est la solution Kormatek adaptée pour nourrir, imprégner et protéger le bois.";
-    products = ["Treolje", "Demidekk Terrassfix si nettoyage nécessaire", "Brosse terrasse", "Chiffon non pelucheux", "Gants"];
-    warning = "Appliquez en couches fines et essuyez l’excédent pour éviter un film collant en surface.";
-    quantities = [
-      `Treolje estimé : ${formatNumber(surface / 8)} L par couche`,
-      "Prévoir 1 à 2 couches selon absorption du bois"
-    ];
-
-  } else if (p === "bois-exterieur" && f === "opaque") {
-    product = "Demidekk Cleantech";
-    categoryUrl = productLinks.kormatekCleantech;
-    explanation = "Pour un bardage, une menuiserie ou un bois extérieur avec finition opaque, Demidekk Cleantech est la solution Kormatek recommandée.";
-    products = ["Demidekk Cleantech", "Nettoyant/préparation", "Brosse / rouleau", "Abrasifs", "Protection de chantier"];
-    warning = "Sur ancien support peint ou lasuré, éliminez les parties non adhérentes avant application.";
-    quantities = [
-      `Finition opaque estimée : ${formatNumber(surface / 8)} L par couche`,
-      "Prévoir généralement 2 couches"
-    ];
-
-  } else if (p === "bois-exterieur") {
-    product = "Gamme protection bois extérieur Kormatek";
-    categoryUrl = productLinks.kormatekExterior;
-    explanation = "Pour un bois extérieur, le choix dépend du rendu souhaité : naturel, teinté ou opaque. La gamme Kormatek protection bois extérieur permet d’orienter vers la bonne solution.";
-    products = ["Produit de protection bois extérieur", "Nettoyant/préparation", "Brosse / rouleau", "Abrasifs", "Gants"];
-    warning = "Un bois extérieur doit être propre, sec et sain avant toute protection.";
-    quantities = [
-      `Produit estimé : ${formatNumber(surface / 8)} L par couche`,
-      "Prévoir 1 à 2 couches selon le système choisi"
-    ];
-
-  } else if (p === "peinture-interieure") {
-    product = "Vegg & Tag 05";
-    categoryUrl = productLinks.kormatekVeggTag;
-    explanation = "Pour murs et plafonds intérieurs, Vegg & Tag 05 est une peinture murale mate à base d’eau.";
-    products = ["Vegg & Tag 05", "Rouleau murs/plafonds", "Brosse à rechampir", "Adhésif de masquage", "Bâche de protection"];
-    warning = "Sur support taché, farinant ou très poreux, prévoyez une préparation adaptée.";
-    quantities = [
-      `Peinture murale estimée : ${formatNumber((surface / 10) * 2)} L pour 2 couches`
-    ];
-
-  } else if (p === "sol-bois-transparent") {
-    product = "Trestjerner Gulvlakk";
-    categoryUrl = productLinks.kormatekGulvlakk;
-    explanation = "Pour parquet, escalier ou sol bois intérieur avec finition transparente résistante, Trestjerner Gulvlakk est la solution vernis.";
-    products = ["Trestjerner Gulvlakk", "Abrasifs", "Rouleau/laqueur", "Dépoussiérage soigneux"];
-    warning = "Sur ancien vernis, poncez et vérifiez l’adhérence.";
-    quantities = [
-      `Vernis estimé : ${formatNumber(surface / 10)} L par couche`,
-      "Prévoir 2 à 3 couches selon sollicitation"
-    ];
-
-  } else if (p === "sol-beton-transparent") {
-    product = "Trestjerner Betongolje";
-    categoryUrl = productLinks.kormatekBetongolje;
-    explanation = "Pour sol béton, dalle poreuse, terre cuite, OSB ou Fermacell avec protection transparente, Trestjerner Betongolje fixe les poussières et bouche les pores.";
-    products = ["Trestjerner Betongolje", "Nettoyant / dégraissant", "Rouleau sol", "Dépoussiérage", "Gants"];
-    warning = "Le béton doit être propre, sec, poreux et parfaitement dépoussiéré.";
-    quantities = [
-      `Saturateur béton estimé : ${formatNumber(surface / 8)} L par couche`
-    ];
-
-  } else if (p === "sol-interieur-opaque") {
-    product = "Trestjerner Gulvmaling";
-    categoryUrl = productLinks.kormatekGulvmaling;
-    explanation = "Pour un sol intérieur en bois ou béton avec finition couvrante, Trestjerner Gulvmaling est une peinture dure adaptée aux sols.";
-    products = ["Trestjerner Gulvmaling", "Nettoyant / dégraissant", "Abrasifs", "Rouleau sol", "Masquage"];
-    warning = "Sur sol déjà peint ou verni, vérifiez l’adhérence et poncez avant application.";
-    quantities = [
-      `Peinture sol estimée : ${formatNumber((surface / 8) * 2)} L pour 2 couches`
-    ];
-
-  } else if (p === "bois-interieur-transparent") {
-    product = "Panelakk";
-    categoryUrl = productLinks.kormatekPanelakk;
-    explanation = "Pour protéger ou décorer un bois intérieur tout en conservant son aspect, Panelakk est une lasure à l’eau transparente, teintée ou incolore.";
-    products = ["Panelakk", "Abrasif fin", "Brosse adaptée", "Chiffon", "Protection de chantier"];
-    warning = "Poncez légèrement et dépoussiérez parfaitement avant application.";
-    quantities = [
-      `Panelakk estimé : ${formatNumber(surface / 10)} L par couche`
-    ];
-
-  } else {
-    product = "Gamme protection bois extérieur Kormatek";
-    categoryUrl = productLinks.kormatekExterior;
-    explanation = "Le choix dépend du rendu attendu : transparent, teinté ou opaque couvrant. La gamme protection bois extérieur Kormatek permet de choisir la bonne finition.";
-    products = ["Produit de protection bois adapté", "Nettoyant/préparation", "Brosse / rouleau", "Abrasifs"];
-    warning = "Un bois doit être propre, sec et sain avant toute protection.";
-    quantities = [
-      `Produit estimé : ${formatNumber(surface / 8)} L par couche`
-    ];
+    if (p === "terrasse-exterieure" && (s === "grise" || s === "sale")) {
+      product = "Demidekk Terrassfix + Treolje";
+      categoryUrl = productLinks.kormatekTerrassfix;
+      explanation = "Pour une terrasse grisée, tachée ou noircie, commencez par nettoyer/dégriser avec Demidekk Terrassfix, puis protégez avec Treolje.";
+      products = ["Demidekk Terrassfix", "Treolje", "Brosse terrasse", "Abrasifs si nécessaire", "Gants"];
+      warning = "Ne saturez pas une terrasse encore grisée, sale ou humide : le bois doit être propre, sec et ouvert avant protection.";
+      quantities = [`Nettoyant/dégriseur : prévoir selon encrassement`, `Treolje estimé : ${formatNumber(surface / 8)} L par couche`];
+    } else if (p === "peinture-interieure") {
+      product = "Vegg & Tag 05";
+      categoryUrl = productLinks.kormatekVeggTag;
+      explanation = "Pour murs et plafonds intérieurs, Vegg & Tag 05 est une peinture murale mate à base d’eau.";
+      products = ["Vegg & Tag 05", "Rouleau murs/plafonds", "Brosse à rechampir", "Adhésif de masquage", "Bâche de protection"];
+      warning = "Sur support taché, farinant ou très poreux, prévoyez une préparation adaptée.";
+      quantities = [`Peinture murale estimée : ${formatNumber((surface / 10) * 2)} L pour 2 couches`];
+    } else if (p === "sol-bois-transparent") {
+      product = "Trestjerner Gulvlakk";
+      categoryUrl = productLinks.kormatekGulvlakk;
+      explanation = "Pour parquet, escalier ou sol bois intérieur avec finition transparente résistante, Trestjerner Gulvlakk est la solution vernis.";
+      products = ["Trestjerner Gulvlakk", "Abrasifs", "Rouleau/laqueur", "Dépoussiérage soigneux"];
+      warning = "Sur ancien vernis, poncez et vérifiez l’adhérence.";
+      quantities = [`Vernis estimé : ${formatNumber(surface / 10)} L par couche`, "Prévoir 2 à 3 couches selon sollicitation"];
+    } else if (p === "sol-beton-transparent") {
+      product = "Trestjerner Betongolje";
+      categoryUrl = productLinks.kormatekBetongolje;
+      explanation = "Pour sol béton, dalle poreuse, terre cuite, OSB ou Fermacell avec protection transparente, Trestjerner Betongolje fixe les poussières et bouche les pores.";
+      products = ["Trestjerner Betongolje", "Nettoyant / dégraissant", "Rouleau sol", "Dépoussiérage", "Gants"];
+      warning = "Le béton doit être propre, sec, poreux et parfaitement dépoussiéré.";
+      quantities = [`Saturateur béton estimé : ${formatNumber(surface / 8)} L par couche`];
+    } else if (p === "sol-interieur-opaque") {
+      product = "Trestjerner Gulvmaling";
+      categoryUrl = productLinks.kormatekGulvmaling;
+      explanation = "Pour un sol intérieur en bois ou béton avec finition couvrante, Trestjerner Gulvmaling est une peinture dure adaptée aux sols.";
+      products = ["Trestjerner Gulvmaling", "Nettoyant / dégraissant", "Abrasifs", "Rouleau sol", "Masquage"];
+      warning = "Sur sol déjà peint ou verni, vérifiez l’adhérence et poncez avant application.";
+      quantities = [`Peinture sol estimée : ${formatNumber((surface / 8) * 2)} L pour 2 couches`];
+    } else if (p === "bois-interieur-transparent") {
+      product = "Panelakk";
+      categoryUrl = productLinks.kormatekPanelakk;
+      explanation = "Pour protéger ou décorer un bois intérieur tout en conservant son aspect, Panelakk est une lasure à l’eau transparente, teintée ou incolore.";
+      products = ["Panelakk", "Abrasif fin", "Brosse adaptée", "Chiffon", "Protection de chantier"];
+      warning = "Poncez légèrement et dépoussiérez parfaitement avant application.";
+      quantities = [`Panelakk estimé : ${formatNumber(surface / 10)} L par couche`];
+    } else {
+      product = f === "opaque" ? "Demidekk Cleantech" : "Gamme protection bois extérieur Kormatek";
+      categoryUrl = f === "opaque" ? productLinks.kormatekCleantech : productLinks.kormatekExterior;
+      explanation = "Le choix dépend du rendu attendu : transparent/teinté ou opaque couvrant.";
+      products = ["Produit de protection bois adapté", "Nettoyant/préparation", "Brosse / rouleau", "Abrasifs"];
+      warning = "Un bois doit être propre, sec et sain avant toute protection.";
+      quantities = [`Produit estimé : ${formatNumber(surface / 8)} L par couche`];
+    }
   }
-}
 
   if (answers.project === "piscine") {
     brand = "Quai West";
@@ -816,41 +733,34 @@ export default function Home() {
     const form = event.currentTarget;
 
     const payload = {
-  "form-name": "diagnostic-quai-west-v2",
-  "bot-field": "",
-  marque: result.brand || "",
-  projet: labelFor("project", answers.project),
-
-  ...(answers.project === "bois" ? {
-    projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
-    etat_kormatek: labelFor("kormatekState", answers.kormatekState),
-    rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish)
-  } : {}),
-
-  support: labelFor("support", answers.support),
-  surface: `${formatNumber(result.surface)} m²`,
-  niveau: form.niveau?.value || "Non renseigné",
-  priorite: labelFor("priority", answers.priority),
-  produit_recommande: result.product || "",
-
-  details_specifiques:
-    answers.project === "piscine"
-      ? `Forme piscine : ${labelFor("poolShape", answers.poolShape)} | Dimensions : ${answers.poolLength} x ${answers.poolWidth} x ${answers.poolDepth} m | Surface piscine : ${formatNumber(getPoolSurface(answers))} m²`
-      : answers.project === "moulage"
-        ? `Dimensions objet : ${answers.objectLength} x ${answers.objectWidth} x ${answers.objectHeight} cm | Volume : ${formatNumber(getObjectVolumeLiters(answers))} L`
-        : "",
-
-  quantites: (result.quantities || []).join(" | "),
-  panier_conseille: (result.products || []).join(" | "),
-  erreur_a_eviter: result.warning || "",
-  prix_estime_min: formatPrice(basketEstimate.low),
-  prix_estime_max: formatPrice(basketEstimate.high),
-  prenom: form.prenom?.value || "",
-  email: form.email?.value || "",
-  telephone: form.telephone?.value || "",
-  commentaire: form.commentaire?.value || "",
-  optin: form.optin?.checked ? "oui" : "non"
-};
+      "form-name": "diagnostic-quai-west",
+      "bot-field": "",
+      marque: result.brand || "",
+      projet: labelFor("project", answers.project),
+      projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
+      etat_kormatek: labelFor("kormatekState", answers.kormatekState),
+      rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish),
+      support: labelFor("support", answers.support),
+      surface: `${formatNumber(result.surface)} m²`,
+      niveau: form.niveau?.value || "Non renseigné",
+      priorite: labelFor("priority", answers.priority),
+      produit_recommande: result.product || "",
+      forme_piscine: labelFor("poolShape", answers.poolShape),
+      dimensions_piscine: `${answers.poolLength || ""} x ${answers.poolWidth || ""} x ${answers.poolDepth || ""} m`,
+      surface_piscine: answers.project === "piscine" ? `${formatNumber(getPoolSurface(answers))} m²` : "",
+      dimensions_objet: answers.project === "moulage" ? `${answers.objectLength || ""} x ${answers.objectWidth || ""} x ${answers.objectHeight || ""} cm` : "",
+      volume_objet: answers.project === "moulage" ? `${formatNumber(getObjectVolumeLiters(answers))} L` : "",
+      quantites: (result.quantities || []).join(" | "),
+      panier_conseille: (result.products || []).join(" | "),
+      erreur_a_eviter: result.warning || "",
+      prix_estime_min: formatPrice(basketEstimate.low),
+      prix_estime_max: formatPrice(basketEstimate.high),
+      prenom: form.prenom?.value || "",
+      email: form.email?.value || "",
+      telephone: form.telephone?.value || "",
+      commentaire: form.commentaire?.value || "",
+      optin: form.optin?.checked ? "oui" : "non"
+    };
 
     setSubmitStatus("Envoi en cours...");
 
@@ -907,8 +817,15 @@ export default function Home() {
             <h2>Produit recommandé</h2>
             <h3>{result.product}</h3>
             <p>{result.explanation}</p>
-            <a className="primary full" href={result.categoryUrl} target="_blank">
+            <a className="primary full" href={result.categoryUrl} target="_blank" rel="noopener noreferrer">
               {answers.project === "bois" ? "Voir la solution Kormatek recommandée" : "Voir les produits recommandés"}
+            </a>
+            <a className="secondary full" href={result.categoryUrl} target="_blank" rel="noopener noreferrer">
+              {answers.project === "carrosserie"
+                ? "Voir tous les kits peinture disponibles"
+                : answers.project === "bois"
+                  ? "Voir la gamme recommandée"
+                  : "Voir tous les produits disponibles"}
             </a>
           </article>
 
@@ -973,8 +890,8 @@ export default function Home() {
         {showLeadForm && (
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
-            <form name="diagnostic-quai-west-v2" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
-              <input type="hidden" name="form-name" value="diagnostic-quai-west-v2" />
+            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
+              <input type="hidden" name="form-name" value="diagnostic-quai-west" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
@@ -1022,18 +939,7 @@ export default function Home() {
 
         {current.type === "cards" && (
           <div className="options">
-            {current.options
-              .filter(option => {
-                if (
-                  current.key === "kormatekState" &&
-                  answers.kormatekProject === "terrasse-exterieure" &&
-                  option.value === "poussiereux"
-                ) {
-                  return false;
-                }
-                return true;
-              })
-              .map(option => (
+            {current.options.map(option => (
               <button key={option.value} className={`option ${answers[current.key] === option.value ? "selected" : ""}`} onClick={() => selectAnswer(current.key, option.value)}>
                 {option.label}
               </button>
