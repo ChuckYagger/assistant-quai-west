@@ -580,22 +580,22 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
 
   } else if (answers.finish === "kit-peinture-brillant") {
     product = "Kit Peinture Brillant";
-    categoryUrl = productLinks.peintureBrillantDirect;
+    categoryUrl = productLinks.peintureKitBrillant;
     explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il convient pour une finition brillante résistante.";
 
   } else if (answers.finish === "kit-peinture-mat") {
     product = "Kit Peinture Mat";
-    categoryUrl = productLinks.peinture;
+    categoryUrl = productLinks. peintureKitMat;
     explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition mate.";
 
   } else if (answers.finish === "kit-peinture-satinee") {
     product = "Kit Peinture Satinée";
-    categoryUrl = productLinks.peinture;
+    categoryUrl = productLinks.peintureKitSatinee;
     explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition satinée.";
 
   } else {
     product = "Kit peinture carrosserie";
-    categoryUrl = productLinks.peintureBrillantDirect;
+    categoryUrl = productLinks.peinture;
     explanation = "Les kits peinture carrosserie sont vendus avec la base, le diluant et le durcisseur.";
   }
 
