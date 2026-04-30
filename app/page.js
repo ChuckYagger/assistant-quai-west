@@ -143,7 +143,7 @@ const specificQuestions = {
       { value: "ancienne-lasure", label: "Ancienne lasure" },
       { value: "ancienne-peinture", label: "Ancienne peinture" },
       { value: "ancien-vernis", label: "Ancien vernis" },
-      { value: "poussiereux", label: "Poussiéreux" }
+      { value: "poussiereux", label: "Béton poreux / poussiéreux" }
     ]},
     { key: "kormatekFinish", title: "Quel rendu souhaitez-vous ?", type: "cards", options: [
       { value: "naturel", label: "Aspect naturel" },
@@ -180,52 +180,50 @@ function getQuestions(answers) {
   let filteredBase = baseQuestions
     .filter(q => !(q.skipFor || []).includes(answers.project))
     .map(q => {
-  // Cas carrosserie
-  if (q.key === "goal" && answers.project === "carrosserie") {
-    return {
-      ...q,
-      options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value))
-    };
+      if (q.key === "goal" && answers.project === "carrosserie") {
+        return { ...q, options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value)) };
+      }
+      return q;
+    });
+
+  // Tunnel optimisé : pas de question "objectif" quand l'intention est déjà claire.
+  if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
+    filteredBase = filteredBase.filter(q => q.key !== "goal");
   }
 
-  // 🔥 Cas bois terrasse → on enlève béton poreux
-  if (
-    q.key === "kormatekState" &&
-    answers.project === "bois" &&
-    answers.kormatekProject === "terrasse-exterieure"
-  ) {
-    return {
-      ...q,
-      options: q.options.filter(opt => opt.value !== "poussiereux")
-    };
+  // Le support est inutile pour la carrosserie dans cette V10 : on est déjà sur peinture carrosserie.
+  if (answers.project === "carrosserie") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
   }
 
-  return q;
-});
+  // Pour le surf, on garde la question spécifique "Votre planche est : polyester / époxy",
+  // donc la question support générale est supprimée.
+  if (answers.project === "surf") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
 
-// Tunnel optimisé : on supprime la question "objectif" pour les projets où elle est inutile
-if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
-  filteredBase = filteredBase.filter(q => q.key !== "goal");
-}
+  // Pour le bois/Kormatek, on ne pose pas la question support générale.
+  if (answers.project === "bois") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
 
-// Le support est inutile pour la carrosserie (déjà implicite)
-if (answers.project === "carrosserie") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+  if (answers.project === "moulage") {
+    filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
+  }
 
-// Pour le surf, on utilise la question spécifique surfBoard
-if (answers.project === "surf") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+  if (answers.project === "bois" && answers.kormatekProject === "terrasse-exterieure") {
+    const boisQuestions = specificQuestions.bois.map(q => {
+      if (q.key === "kormatekState") {
+        return {
+          ...q,
+          options: q.options.filter(opt => opt.value !== "poussiereux")
+        };
+      }
+      return q;
+    });
 
-// Pour le moulage → tunnel spécifique (volume au lieu de surface)
-if (answers.project === "moulage") {
-  filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
-}
-  // Pour le bois → on ne veut PAS de logique technique type composite
-if (answers.project === "bois") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+    return [...filteredBase, ...boisQuestions];
+  }
 
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
@@ -944,7 +942,7 @@ export default function Home() {
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
             <form name="diagnostic-quai-west-v2" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
-              <input type="hidden" name="form-name" value="diagnostic-quai-west" />
+              <input type="hidden" name="form-name" value="diagnostic-quai-west-v2" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
@@ -991,19 +989,25 @@ export default function Home() {
         <h1>{current.title}</h1>
 
         {current.type === "cards" && (
-  <div className="options">
-    {current.options
-      .filter(option => {
-        if (
-          current.key === "kormatekState" &&
-          answers.kormatekProject === "terrasse-exterieure" &&
-          option.value === "poussiereux"
-        ) {
-          return false;
-        }
-        return true;
-      })
-      .map(option => (
+          <div className="options">
+            {current.options
+              .filter(option => {
+                if (
+                  current.key === "kormatekState" &&
+                  answers.kormatekProject === "terrasse-exterieure" &&
+                  option.value === "poussiereux"
+                ) {
+                  return false;
+                }
+                return true;
+              })
+              .map(option => (
+              <button key={option.value} className={`option ${answers[current.key] === option.value ? "selected" : ""}`} onClick={() => selectAnswer(current.key, option.value)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {current.key === "poolShape" && (
           <p className="helperText">
