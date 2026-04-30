@@ -31,7 +31,7 @@ const productLinks = {
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
-  kormatekExterior: "https://www.kormatek-boisetdeco.fr/",
+  kormatekExterior: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur",
   kormatekTerrasse: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/33-150-treolje-solvent-ou-v-7029350006831.html",
   kormatekTerrassfix: "https://www.kormatek-boisetdeco.fr/nettoyant-pour-menuiseries-sols/40-demidekk-terrassfix-7029350153726.html",
   kormatekCleantech: "https://www.kormatek-boisetdeco.fr/protection-du-bois-exterieur/30-106-demidekk-cleantech.html",
