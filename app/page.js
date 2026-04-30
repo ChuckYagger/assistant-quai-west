@@ -926,7 +926,7 @@ export default function Home() {
         {showLeadForm && (
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
-            <form name="diagnostic-quai-west" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
+            <form name="diagnostic-quai-west-v2" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
               <input type="hidden" name="form-name" value="diagnostic-quai-west" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
