@@ -765,34 +765,45 @@ export default function Home() {
     const form = event.currentTarget;
 
     const payload = {
-      "form-name": "diagnostic-quai-west",
-      "bot-field": "",
-      marque: result.brand || "",
-      projet: labelFor("project", answers.project),
-      projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
-      etat_kormatek: labelFor("kormatekState", answers.kormatekState),
-      rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish),
-      support: labelFor("support", answers.support),
-      surface: `${formatNumber(result.surface)} m²`,
-      niveau: form.niveau?.value || "Non renseigné",
-      priorite: labelFor("priority", answers.priority),
-      produit_recommande: result.product || "",
-      forme_piscine: labelFor("poolShape", answers.poolShape),
-      dimensions_piscine: `${answers.poolLength || ""} x ${answers.poolWidth || ""} x ${answers.poolDepth || ""} m`,
-      surface_piscine: answers.project === "piscine" ? `${formatNumber(getPoolSurface(answers))} m²` : "",
-      dimensions_objet: answers.project === "moulage" ? `${answers.objectLength || ""} x ${answers.objectWidth || ""} x ${answers.objectHeight || ""} cm` : "",
-      volume_objet: answers.project === "moulage" ? `${formatNumber(getObjectVolumeLiters(answers))} L` : "",
-      quantites: (result.quantities || []).join(" | "),
-      panier_conseille: (result.products || []).join(" | "),
-      erreur_a_eviter: result.warning || "",
-      prix_estime_min: formatPrice(basketEstimate.low),
-      prix_estime_max: formatPrice(basketEstimate.high),
-      prenom: form.prenom?.value || "",
-      email: form.email?.value || "",
-      telephone: form.telephone?.value || "",
-      commentaire: form.commentaire?.value || "",
-      optin: form.optin?.checked ? "oui" : "non"
-    };
+  "form-name": "diagnostic-quai-west",
+  "bot-field": "",
+  marque: result.brand || "",
+  projet: labelFor("project", answers.project),
+
+  ...(answers.project === "bois" ? {
+    projet_kormatek: labelFor("kormatekProject", answers.kormatekProject),
+    etat_kormatek: labelFor("kormatekState", answers.kormatekState),
+    rendu_kormatek: labelFor("kormatekFinish", answers.kormatekFinish)
+  } : {}),
+
+  support: labelFor("support", answers.support),
+  surface: `${formatNumber(result.surface)} m²`,
+  niveau: form.niveau?.value || "Non renseigné",
+  priorite: labelFor("priority", answers.priority),
+  produit_recommande: result.product || "",
+
+  ...(answers.project === "piscine" ? {
+    forme_piscine: labelFor("poolShape", answers.poolShape),
+    dimensions_piscine: `${answers.poolLength} x ${answers.poolWidth} x ${answers.poolDepth} m`,
+    surface_piscine: `${formatNumber(getPoolSurface(answers))} m²`
+  } : {}),
+
+  ...(answers.project === "moulage" ? {
+    dimensions_objet: `${answers.objectLength} x ${answers.objectWidth} x ${answers.objectHeight} cm`,
+    volume_objet: `${formatNumber(getObjectVolumeLiters(answers))} L`
+  } : {}),
+
+  quantites: (result.quantities || []).join(" | "),
+  panier_conseille: (result.products || []).join(" | "),
+  erreur_a_eviter: result.warning || "",
+  prix_estime_min: formatPrice(basketEstimate.low),
+  prix_estime_max: formatPrice(basketEstimate.high),
+  prenom: form.prenom?.value || "",
+  email: form.email?.value || "",
+  telephone: form.telephone?.value || "",
+  commentaire: form.commentaire?.value || "",
+  optin: form.optin?.checked ? "oui" : "non"
+};
 
     setSubmitStatus("Envoi en cours...");
 
