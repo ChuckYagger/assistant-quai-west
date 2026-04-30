@@ -576,45 +576,42 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
   if (answers.finish === "kit-brillant-direct-ral") {
     product = "Kit Brillant Direct RAL";
     categoryUrl = productLinks.peintureBrillantDirect;
-    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il est idéal pour une couleur RAL en finition brillant direct.";
 
   } else if (answers.finish === "kit-peinture-brillant") {
     product = "Kit Peinture Brillant";
-    categoryUrl = productLinks.peintureBrillantDirect;
-    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il convient pour une finition brillante résistante.";
+    categoryUrl = productLinks.peintureKitBrillant;
 
   } else if (answers.finish === "kit-peinture-mat") {
     product = "Kit Peinture Mat";
-    categoryUrl = productLinks.peinture;
-    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition mate.";
+    categoryUrl = productLinks.peintureKitMat;
 
   } else if (answers.finish === "kit-peinture-satinee") {
     product = "Kit Peinture Satinée";
-    categoryUrl = productLinks.peinture;
-    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition satinée.";
+    categoryUrl = productLinks.peintureKitSatinee;
 
   } else {
     product = "Kit peinture carrosserie";
     categoryUrl = productLinks.peintureBrillantDirect;
-    explanation = "Les kits peinture carrosserie sont vendus avec la base, le diluant et le durcisseur.";
   }
+
+  explanation = "Tous les kits sont fournis avec la base, le diluant et le durcisseur pour une application simplifiée.";
 
   products = [
     product,
     "Base peinture",
     "Diluant",
     "Durcisseur",
-    "Apprêt si nécessaire",
+    "Apprêt",
     "Dégraissant",
     "Abrasifs",
     "Masquage"
   ];
 
-  warning = "Ne peignez jamais sur un support mal préparé : graisse, poussière, ancienne peinture non poncée ou support humide.";
+  warning = "Une mauvaise préparation du support est la première cause d’échec en peinture carrosserie.";
 
   quantities = [
     `Kit peinture estimé : ${formatNumber((surface / 9) * 2)} L pour 2 couches`,
-    "Base + diluant + durcisseur inclus dans le kit"
+    "Base + diluant + durcisseur inclus"
   ];
 }
 if (answers.project === "bois") {
