@@ -143,7 +143,7 @@ const specificQuestions = {
       { value: "ancienne-lasure", label: "Ancienne lasure" },
       { value: "ancienne-peinture", label: "Ancienne peinture" },
       { value: "ancien-vernis", label: "Ancien vernis" },
-      { value: "poussiereux", label: "Béton poreux / poussiéreux" }
+      { value: "poussiereux", label: "Poussiéreux" }
     ]},
     { key: "kormatekFinish", title: "Quel rendu souhaitez-vous ?", type: "cards", options: [
       { value: "naturel", label: "Aspect naturel" },
