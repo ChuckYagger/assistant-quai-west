@@ -27,7 +27,11 @@ const productLinks = {
   piscine: "https://boutique.quai-west-composites.fr/369-piscine",
 
   // Peinture / carrosserie
-  peinture: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+polyurethane",
+  peinture: "https://boutique.quai-west-composites.fr/371-peinture-industrielle",
+  peintureBrillantDirect: "https://boutique.quai-west-composites.fr/345-peintures-polyurethanes-brillant-direct",
+  peintureKitMat: "https://boutique.quai-west-composites.fr/364-peinture-industrielle-mat-en-kit",
+  peintureKitSatinee: "https://boutique.quai-west-composites.fr/363-peinture-industrielle-satinee-en-kit",
+  peintureKitBrillant: "https://boutique.quai-west-composites.fr/362-peinture-industrielle-brillant-en-kit",
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
@@ -117,13 +121,13 @@ const specificQuestions = {
     ]},
     { key: "dimensions", title: "Quelle est la taille de votre objet ?", type: "dimensions" }
   ],
-  carrosserie: [
-    { key: "finish", title: "Finition souhaitée :", type: "cards", options: [
-      { value: "brillant-direct", label: "Brillant direct" },
-      { value: "base-vernis", label: "Base mate + vernis" },
-      { value: "metalisee", label: "Métallisée" },
-      { value: "ral", label: "RAL couleur unie" },
-      { value: "inconnu", label: "Je ne sais pas" }
+carrosserie: [
+  { key: "finish", title: "Quelle finition souhaitez-vous ?", type: "cards", options: [
+    { value: "kit-brillant-direct-ral", label: "Kit Brillant Direct RAL" },
+    { value: "kit-peinture-brillant", label: "Kit Peinture Brillant" },
+    { value: "kit-peinture-mat", label: "Kit Peinture Mat" },
+    { value: "kit-peinture-satinee", label: "Kit Peinture Satinée" },
+    { value: "inconnu", label: "Je ne sais pas" }
     ]}
   ],
   bois: [
@@ -143,7 +147,7 @@ const specificQuestions = {
       { value: "ancienne-lasure", label: "Ancienne lasure" },
       { value: "ancienne-peinture", label: "Ancienne peinture" },
       { value: "ancien-vernis", label: "Ancien vernis" },
-      { value: "poussiereux", label: "Poussiéreux" }
+      { value: "poussiereux", label: "Béton poreux / poussiéreux" }
     ]},
     { key: "kormatekFinish", title: "Quel rendu souhaitez-vous ?", type: "cards", options: [
       { value: "naturel", label: "Aspect naturel" },
@@ -180,52 +184,50 @@ function getQuestions(answers) {
   let filteredBase = baseQuestions
     .filter(q => !(q.skipFor || []).includes(answers.project))
     .map(q => {
-  // Cas carrosserie
-  if (q.key === "goal" && answers.project === "carrosserie") {
-    return {
-      ...q,
-      options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value))
-    };
+      if (q.key === "goal" && answers.project === "carrosserie") {
+        return { ...q, options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value)) };
+      }
+      return q;
+    });
+
+  // Tunnel optimisé : pas de question "objectif" quand l'intention est déjà claire.
+  if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
+    filteredBase = filteredBase.filter(q => q.key !== "goal");
   }
 
-  // 🔥 Cas bois terrasse → on enlève béton poreux
-  if (
-    q.key === "kormatekState" &&
-    answers.project === "bois" &&
-    answers.kormatekProject === "terrasse-exterieure"
-  ) {
-    return {
-      ...q,
-      options: q.options.filter(opt => opt.value !== "poussiereux")
-    };
+  // Le support est inutile pour la carrosserie dans cette V10 : on est déjà sur peinture carrosserie.
+  if (answers.project === "carrosserie") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
   }
 
-  return q;
-});
+  // Pour le surf, on garde la question spécifique "Votre planche est : polyester / époxy",
+  // donc la question support générale est supprimée.
+  if (answers.project === "surf") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
 
-// Tunnel optimisé : on supprime la question "objectif" pour les projets où elle est inutile
-if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
-  filteredBase = filteredBase.filter(q => q.key !== "goal");
-}
+  // Pour le bois/Kormatek, on ne pose pas la question support générale.
+  if (answers.project === "bois") {
+    filteredBase = filteredBase.filter(q => q.key !== "support");
+  }
 
-// Le support est inutile pour la carrosserie (déjà implicite)
-if (answers.project === "carrosserie") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+  if (answers.project === "moulage") {
+    filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
+  }
 
-// Pour le surf, on utilise la question spécifique surfBoard
-if (answers.project === "surf") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+  if (answers.project === "bois" && answers.kormatekProject === "terrasse-exterieure") {
+    const boisQuestions = specificQuestions.bois.map(q => {
+      if (q.key === "kormatekState") {
+        return {
+          ...q,
+          options: q.options.filter(opt => opt.value !== "poussiereux")
+        };
+      }
+      return q;
+    });
 
-// Pour le moulage → tunnel spécifique (volume au lieu de surface)
-if (answers.project === "moulage") {
-  filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
-}
-  // Pour le bois → on ne veut PAS de logique technique type composite
-if (answers.project === "bois") {
-  filteredBase = filteredBase.filter(q => q.key !== "support");
-}
+    return [...filteredBase, ...boisQuestions];
+  }
 
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
@@ -569,21 +571,52 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
   }
 
   if (answers.project === "carrosserie") {
-    title = "Peinture carrosserie";
-      const smartOffer = getSmartOffer(answers);
+  title = "Peinture carrosserie";
 
-  product = smartOffer.main;
-  categoryUrl = smartOffer.url;
-  products = [smartOffer.upsell, ...smartOffer.complements];
+  if (answers.finish === "kit-brillant-direct-ral") {
+    product = "Kit Brillant Direct RAL";
+    categoryUrl = productLinks.peintureBrillantDirect;
+    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il est idéal pour une couleur RAL en finition brillant direct.";
 
-    product = answers.finish === "base-vernis" || answers.finish === "metalisee" ? "Base mate + vernis" : "Peinture polyuréthane brillant direct";
+  } else if (answers.finish === "kit-peinture-brillant") {
+    product = "Kit Peinture Brillant";
+    categoryUrl = productLinks.peintureBrillantDirect;
+    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il convient pour une finition brillante résistante.";
+
+  } else if (answers.finish === "kit-peinture-mat") {
+    product = "Kit Peinture Mat";
     categoryUrl = productLinks.peinture;
-    explanation = product.includes("Base") ? "Les finitions métallisées nécessitent généralement une base couleur puis un vernis." : "Pour une couleur RAL unie, le brillant direct est efficace et résistant.";
-    products = ["Peinture", "Durcisseur", "Diluant", "Apprêt si nécessaire", "Dégraissant", "Abrasifs", "Masquage"];
-    warning = "Ne peignez jamais sur un support mal dégraissé ou insuffisamment poncé.";
-    quantities = [`Peinture estimée : ${formatNumber((surface / 9) * 2)} L pour 2 couches`, "Prévoir durcisseur et diluant selon fiche technique"];
+    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition mate.";
+
+  } else if (answers.finish === "kit-peinture-satinee") {
+    product = "Kit Peinture Satinée";
+    categoryUrl = productLinks.peinture;
+    explanation = "Ce kit est vendu avec la base, le diluant et le durcisseur. Il permet d’obtenir une finition satinée.";
+
+  } else {
+    product = "Kit peinture carrosserie";
+    categoryUrl = productLinks.peintureBrillantDirect;
+    explanation = "Les kits peinture carrosserie sont vendus avec la base, le diluant et le durcisseur.";
   }
 
+  products = [
+    product,
+    "Base peinture",
+    "Diluant",
+    "Durcisseur",
+    "Apprêt si nécessaire",
+    "Dégraissant",
+    "Abrasifs",
+    "Masquage"
+  ];
+
+  warning = "Ne peignez jamais sur un support mal préparé : graisse, poussière, ancienne peinture non poncée ou support humide.";
+
+  quantities = [
+    `Kit peinture estimé : ${formatNumber((surface / 9) * 2)} L pour 2 couches`,
+    "Base + diluant + durcisseur inclus dans le kit"
+  ];
+}
 if (answers.project === "bois") {
   brand = "Kormatek Bois & Déco";
   title = "Diagnostic Kormatek Bois & Déco";
@@ -877,15 +910,8 @@ export default function Home() {
             <h2>Produit recommandé</h2>
             <h3>{result.product}</h3>
             <p>{result.explanation}</p>
-            <a className="primary full" href={result.categoryUrl} target="_blank" rel="noopener noreferrer">
+            <a className="primary full" href={result.categoryUrl} target="_blank">
               {answers.project === "bois" ? "Voir la solution Kormatek recommandée" : "Voir les produits recommandés"}
-            </a>
-            <a className="secondary full" href={result.categoryUrl} target="_blank" rel="noopener noreferrer">
-              {answers.project === "carrosserie"
-                ? "Voir tous les kits peinture disponibles"
-                : answers.project === "bois"
-                  ? "Voir la gamme recommandée"
-                  : "Voir tous les produits disponibles"}
             </a>
           </article>
 
@@ -951,7 +977,7 @@ export default function Home() {
           <section className="leadBox">
             <h2>Recevoir mon diagnostic</h2>
             <form name="diagnostic-quai-west-v2" method="POST" data-netlify="true" netlify-honeypot="bot-field" onSubmit={handleLeadSubmit} className="leadForm">
-              <input type="hidden" name="form-name" value="diagnostic-quai-west" />
+              <input type="hidden" name="form-name" value="diagnostic-quai-west-v2" />
               <p style={{ display: "none" }}><label>Ne pas remplir : <input name="bot-field" /></label></p>
               <label>Prénom<input name="prenom" required placeholder="Votre prénom" /></label>
               <label>Email<input name="email" type="email" required placeholder="votre@email.fr" /></label>
@@ -997,31 +1023,26 @@ export default function Home() {
         )}
         <h1>{current.title}</h1>
 
-   {current.type === "cards" && (
-  <div className="options">
-    {current.options
-      .filter(option => {
-        if (
-          current.key === "kormatekState" &&
-          answers.kormatekProject === "terrasse-exterieure" &&
-          option.value === "poussiereux"
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .map(option => (
-        <button
-          key={option.value}
-          className={`option ${answers[current.key] === option.value ? "selected" : ""}`}
-          onClick={() => selectAnswer(current.key, option.value)}
-        >
-          {option.label}
-        </button>
-      ))}
-  </div>
-)}
+        {current.type === "cards" && (
+          <div className="options">
+            {current.options
+              .filter(option => {
+                if (
+                  current.key === "kormatekState" &&
+                  answers.kormatekProject === "terrasse-exterieure" &&
+                  option.value === "poussiereux"
+                ) {
+                  return false;
+                }
+                return true;
+              })
+              .map(option => (
+              <button key={option.value} className={`option ${answers[current.key] === option.value ? "selected" : ""}`} onClick={() => selectAnswer(current.key, option.value)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {current.key === "poolShape" && (
           <p className="helperText">
