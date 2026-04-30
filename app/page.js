@@ -180,11 +180,28 @@ function getQuestions(answers) {
   let filteredBase = baseQuestions
     .filter(q => !(q.skipFor || []).includes(answers.project))
     .map(q => {
-      if (q.key === "goal" && answers.project === "carrosserie") {
-        return { ...q, options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value)) };
-      }
-      return q;
-    });
+  // Cas carrosserie
+  if (q.key === "goal" && answers.project === "carrosserie") {
+    return {
+      ...q,
+      options: q.options.filter(opt => ["peindre", "finition"].includes(opt.value))
+    };
+  }
+
+  // 🔥 Cas bois terrasse → on enlève béton poreux
+  if (
+    q.key === "kormatekState" &&
+    answers.project === "bois" &&
+    answers.kormatekProject === "terrasse-exterieure"
+  ) {
+    return {
+      ...q,
+      options: q.options.filter(opt => opt.value !== "poussiereux")
+    };
+  }
+
+  return q;
+});
 
 // Tunnel optimisé : on supprime la question "objectif" pour les projets où elle est inutile
 if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
