@@ -782,16 +782,12 @@ export default function Home() {
   priorite: labelFor("priority", answers.priority),
   produit_recommande: result.product || "",
 
-  ...(answers.project === "piscine" ? {
-    forme_piscine: labelFor("poolShape", answers.poolShape),
-    dimensions_piscine: `${answers.poolLength} x ${answers.poolWidth} x ${answers.poolDepth} m`,
-    surface_piscine: `${formatNumber(getPoolSurface(answers))} m²`
-  } : {}),
-
-  ...(answers.project === "moulage" ? {
-    dimensions_objet: `${answers.objectLength} x ${answers.objectWidth} x ${answers.objectHeight} cm`,
-    volume_objet: `${formatNumber(getObjectVolumeLiters(answers))} L`
-  } : {}),
+  details_specifiques:
+    answers.project === "piscine"
+      ? `Forme piscine : ${labelFor("poolShape", answers.poolShape)} | Dimensions : ${answers.poolLength} x ${answers.poolWidth} x ${answers.poolDepth} m | Surface piscine : ${formatNumber(getPoolSurface(answers))} m²`
+      : answers.project === "moulage"
+        ? `Dimensions objet : ${answers.objectLength} x ${answers.objectWidth} x ${answers.objectHeight} cm | Volume : ${formatNumber(getObjectVolumeLiters(answers))} L`
+        : "",
 
   quantites: (result.quantities || []).join(" | "),
   panier_conseille: (result.products || []).join(" | "),
