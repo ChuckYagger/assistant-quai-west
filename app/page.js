@@ -126,7 +126,7 @@ carrosserie: [
     { value: "kit-brillant-direct-ral", label: "Kit Brillant Direct RAL" },
     { value: "kit-peinture-brillant", label: "Kit Peinture Brillant" },
     { value: "kit-peinture-mat", label: "Kit Peinture Mat" },
-    { value: "kit-peinture-satinee", label: "Kit Peinture Satinée" }
+    { value: "kit-peinture-satinee", label: "Kit Peinture Satinée" },
     { value: "inconnu", label: "Je ne sais pas" }
     ]}
   ],
