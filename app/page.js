@@ -186,25 +186,29 @@ function getQuestions(answers) {
       return q;
     });
 
-  // Tunnel optimisé : pas de question "objectif" quand l'intention est déjà claire.
-  if (["bateau", "surf", "carrosserie"].includes(answers.project)) {
-    filteredBase = filteredBase.filter(q => q.key !== "goal");
-  }
+// Tunnel optimisé : on supprime la question "objectif" pour les projets où elle est inutile
+if (["bateau", "surf", "carrosserie", "bois"].includes(answers.project)) {
+  filteredBase = filteredBase.filter(q => q.key !== "goal");
+}
 
-  // Le support est inutile pour la carrosserie dans cette V10 : on est déjà sur peinture carrosserie.
-  if (answers.project === "carrosserie") {
-    filteredBase = filteredBase.filter(q => q.key !== "support");
-  }
+// Le support est inutile pour la carrosserie (déjà implicite)
+if (answers.project === "carrosserie") {
+  filteredBase = filteredBase.filter(q => q.key !== "support");
+}
 
-  // Pour le surf, on garde la question spécifique "Votre planche est : polyester / époxy",
-  // donc la question support générale est supprimée.
-  if (answers.project === "surf") {
-    filteredBase = filteredBase.filter(q => q.key !== "support");
-  }
+// Pour le surf, on utilise la question spécifique surfBoard
+if (answers.project === "surf") {
+  filteredBase = filteredBase.filter(q => q.key !== "support");
+}
 
-  if (answers.project === "moulage") {
-    filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
-  }
+// Pour le moulage → tunnel spécifique (volume au lieu de surface)
+if (answers.project === "moulage") {
+  filteredBase = filteredBase.filter(q => !["surface", "support", "goal"].includes(q.key));
+}
+  // Pour le bois → on ne veut PAS de logique technique type composite
+if (answers.project === "bois") {
+  filteredBase = filteredBase.filter(q => q.key !== "support");
+}
 
   return [...filteredBase, ...(specificQuestions[answers.project] || [])];
 }
