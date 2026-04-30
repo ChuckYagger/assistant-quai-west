@@ -974,14 +974,19 @@ export default function Home() {
         <h1>{current.title}</h1>
 
         {current.type === "cards" && (
-          <div className="options">
-            {current.options.map(option => (
-              <button key={option.value} className={`option ${answers[current.key] === option.value ? "selected" : ""}`} onClick={() => selectAnswer(current.key, option.value)}>
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
+  <div className="options">
+    {current.options
+      .filter(option => {
+        if (
+          current.key === "kormatekState" &&
+          answers.kormatekProject === "terrasse-exterieure" &&
+          option.value === "poussiereux"
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map(option => (
 
         {current.key === "poolShape" && (
           <p className="helperText">
