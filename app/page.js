@@ -997,7 +997,7 @@ export default function Home() {
         )}
         <h1>{current.title}</h1>
 
-        {current.type === "cards" && (
+   {current.type === "cards" && (
   <div className="options">
     {current.options
       .filter(option => {
@@ -1008,9 +1008,20 @@ export default function Home() {
         ) {
           return false;
         }
+
         return true;
       })
       .map(option => (
+        <button
+          key={option.value}
+          className={`option ${answers[current.key] === option.value ? "selected" : ""}`}
+          onClick={() => selectAnswer(current.key, option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+  </div>
+)}
 
         {current.key === "poolShape" && (
           <p className="helperText">
