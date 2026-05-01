@@ -47,7 +47,7 @@ const productLinks = {
   peintureBombeTeintesReferencees: "https://boutique.quai-west-composites.fr/312-teintes-referencees",
   peintureBombesTechniques: "https://boutique.quai-west-composites.fr/313-sprays-techniques",
   peintureBombesVernis: "https://boutique.quai-west-composites.fr/316-vernis-en-bombe",
-  peintureNautique: "https://boutique.quai-west-composites.fr/recherche?controller=search&s=peinture+nautique",
+  peintureNautique: "https://boutique.quai-west-composites.fr/365-peinture-nautique-brillant-direct",
 
   // Kormatek
   kormatekHome: "https://www.kormatek-boisetdeco.fr/",
