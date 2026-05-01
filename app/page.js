@@ -242,11 +242,28 @@ function getQuestions(answers) {
   let specific = specificQuestions[answers.project] || [];
 
   if (answers.project === "carrosserie") {
-    specific = specificQuestions.carrosserie.filter(q => {
+  const surfaceValue = parseFloat(String(answers.surface || "0").replace(",", ".")) || 0;
+
+  specific = specificQuestions.carrosserie
+    .filter(q => {
       if (!q.showIf) return true;
       return answers[q.showIf.key] === q.showIf.value;
+    })
+    .map(q => {
+      if (q.key === "paintType") {
+        return {
+          ...q,
+          options: q.options.filter(opt => {
+            if (opt.value === "peinture-bombe" && surfaceValue > 2) {
+              return false;
+            }
+            return true;
+          })
+        };
+      }
+      return q;
     });
-  }
+}
 
   if (answers.project === "bois" && answers.kormatekProject === "terrasse-exterieure") {
     specific = specificQuestions.bois.map(q => {
