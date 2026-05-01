@@ -1030,6 +1030,11 @@ export default function Home() {
             <div className="quickSurfaces">
               {["0.25", "0.5", "1", "3", "5", "10", "20", "50"].map(value => <button key={value} onClick={() => selectAnswer("surface", value)}>{value} m²</button>)}
             </div>
+          {answers.project === "carrosserie" && Number(answers.surface) > 2 && (
+      <p className="helperText">
+        Pour une surface supérieure à 2 m², nous orientons vers une peinture en kit plutôt qu’une bombe.
+      </p>
+    )}
           </div>
         )}
 
