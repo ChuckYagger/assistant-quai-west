@@ -7,6 +7,7 @@ const productLinks = {
 
   // Bateau / coque
   kitReparationPolyester: "https://boutique.quai-west-composites.fr/116-resine-kit",
+  kitReparationEpoxy: "https://boutique.quai-west-composites.fr/kit-de-resine-epoxy/28-88-surf-1070-81833531725.html#/231-kit-623_kg",
   resinePolyester: "https://boutique.quai-west-composites.fr/5-resines-polyester",
   gelcoat: "https://boutique.quai-west-composites.fr/11-gel-coat",
   gelcoatPolyester: "https://boutique.quai-west-composites.fr/12-gel-coat-polyester",
@@ -466,19 +467,51 @@ function getPaintTechnicalOffer(answers) {
 
 function getSmartOffer(answers) {
   if (answers.project === "bateau") {
-    if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
+    // Compatibilité prioritaire : un support époxy doit rester sur un système époxy.
+    if (answers.support === "epoxy") {
       return {
-        main: "Gelcoat polyester de réparation",
-        url: productLinks.gelcoatPolyester,
-        upsell: "Kit finition gelcoat complet",
-        complements: ["Catalyseur", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
+        main: "Kit de réparation époxy pour coque",
+        url: productLinks.kitReparationEpoxy || productLinks.epoxy || productLinks.boutique,
+        upsell: "Pack réparation époxy complet",
+        complements: [
+          "Résine époxy",
+          "Durcisseur compatible",
+          "Tissu de verre",
+          "Charge ou mastic époxy si nécessaire",
+          "Abrasifs",
+          "Nettoyant adapté",
+          "Gants"
+        ]
       };
     }
+
+    if (answers.support === "polyester") {
+      if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
+        return {
+          main: "Gelcoat polyester de réparation",
+          url: productLinks.gelcoatPolyester,
+          upsell: "Kit finition gelcoat complet",
+          complements: ["Catalyseur", "Abrasifs", "Acétone", "Pinceaux", "Polish"]
+        };
+      }
+
+      return {
+        main: "Kit réparation polyester",
+        url: productLinks.kitReparationPolyester,
+        upsell: "Pack stratification polyester complet",
+        complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Acétone", "Gants"]
+      };
+    }
+
     return {
-      main: "Kit réparation polyester",
-      url: productLinks.kitReparationPolyester,
-      upsell: "Pack stratification complet",
-      complements: ["Mat de verre", "Catalyseur", "Rouleau débulleur", "Acétone", "Gants"]
+      main: "Compatibilité du support à confirmer",
+      url: productLinks.boutique,
+      upsell: "Validation technique Quai West recommandée",
+      complements: [
+        "Identifier la résine d’origine",
+        "Vérifier la compatibilité avant commande",
+        "Effectuer un essai d’adhérence"
+      ]
     };
   }
 
@@ -552,40 +585,55 @@ function recommend(answers) {
 if (answers.project === "bateau") {
   title = "Réparation bateau / coque";
 
-  if (answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure") {
-    product = "Gelcoat polyester de réparation";
-    categoryUrl = productLinks.gelcoatPolyester;
-    explanation = "Pour une reprise de gelcoat ou une petite fissure, une finition gelcoat polyester adaptée permet de retrouver une surface propre et protégée.";
-    products = [
-      "Gelcoat polyester",
-      "Catalyseur polyester",
-      "Abrasifs",
-      "Acétone",
-      "Pinceaux",
-      "Polish de finition"
+  const smartOffer = getSmartOffer(answers);
+  product = smartOffer.main;
+  categoryUrl = smartOffer.url;
+  products = [smartOffer.upsell, ...smartOffer.complements];
+
+  if (answers.support === "epoxy") {
+    explanation =
+      "La coque ou la zone à réparer est en époxy. La réparation doit être réalisée avec une résine époxy et un durcisseur compatibles. Aucun système polyester n’est proposé pour cette configuration.";
+
+    warning =
+      "N’utilisez pas de kit polyester, de résine polyester ou de gelcoat polyester comme système de réparation sur ce support époxy. La finition doit être choisie après validation de sa compatibilité avec le système époxy utilisé.";
+
+    const epoxyKg = surface * 1.5;
+    quantities = [
+      `Résine époxy estimée : ${formatNumber(epoxyKg)} kg`,
+      "Durcisseur : quantité selon le ratio exact indiqué par le fabricant",
+      `Tissu de verre estimé : ${formatNumber(surface * 2)} m² environ`
     ];
+  } else if (answers.support === "polyester") {
+    const isGelcoatRepair = answers.boatIssue === "gelcoat" || answers.boatIssue === "fissure";
+
+    explanation = isGelcoatRepair
+      ? "Le support polyester permet une reprise avec un système gelcoat polyester compatible, après une préparation soigneuse de la zone."
+      : "Pour une coque polyester, un kit de réparation polyester avec renfort en fibre de verre est adapté à une réparation correctement préparée.";
+
+    warning =
+      "Le support doit être sec, dégraissé, poncé et débarrassé de toutes les parties non adhérentes avant application.";
+
+    const resinKg = surface * 2 * 0.8;
+    quantities = isGelcoatRepair
+      ? [
+          `Gelcoat estimé : ${formatNumber(surface * 0.6)} kg`,
+          "Catalyseur : dosage selon la fiche technique du gelcoat",
+          "Prévoir abrasifs et polish pour la finition"
+        ]
+      : [
+          `Résine polyester estimée : ${formatNumber(resinKg)} kg`,
+          `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
+          `Fibre estimée : ${formatNumber(surface * 2)} m² environ`
+        ];
   } else {
-    product = "Kit réparation polyester";
-    categoryUrl = productLinks.kitReparationPolyester;
-    explanation = "Pour une coque polyester, une réparation avec résine polyester, renfort fibre et catalyseur permet de retrouver solidité et étanchéité.";
-    products = [
-      "Kit réparation polyester",
-      "Mat de verre",
-      "Catalyseur polyester",
-      "Rouleau débulleur",
-      "Acétone",
-      "Gants"
-    ];
+    explanation =
+      "La nature du stratifié d’origine n’a pas été identifiée avec certitude. Une validation technique est nécessaire avant de choisir une résine de réparation.";
+
+    warning =
+      "Ne commandez pas de kit polyester ou époxy tant que la nature du support n’est pas confirmée.";
+
+    quantities = ["Quantités non calculées : identification du support nécessaire"];
   }
-
-  warning = "Ne stratifiez jamais sur un support humide, gras ou insuffisamment poncé.";
-
-  const resinKg = surface * 2 * 0.8;
-  quantities = [
-    `Résine estimée : ${formatNumber(resinKg)} kg`,
-    `Catalyseur à 2 % : ${formatNumber(resinKg * 1000 * 0.02)} g`,
-    `Fibre : ${formatNumber(surface * 2)} m² environ`
-  ];
 }
 
 if (answers.project === "surf") {
@@ -736,6 +784,32 @@ if (answers.moldingNeed === "reproduction-petite-piece" || answers.moldingNeed =
     const resinKg = surface * 2 * 0.8;
     quantities = [`Résine estimée : ${formatNumber(resinKg)} kg`, `Renfort : ${formatNumber(surface * 2)} m² environ`];
   }
+// Filet de sécurité critique : jamais de recommandation polyester sur une coque époxy.
+if (
+  answers.project === "bateau" &&
+  answers.support === "epoxy" &&
+  (
+    categoryUrl === productLinks.kitReparationPolyester ||
+    categoryUrl === productLinks.resinePolyester ||
+    categoryUrl === productLinks.gelcoat ||
+    categoryUrl === productLinks.gelcoatPolyester
+  )
+) {
+  product = "Kit de réparation époxy pour coque";
+  categoryUrl = productLinks.kitReparationEpoxy || productLinks.epoxy || productLinks.boutique;
+  explanation =
+    "Correction de compatibilité : une réparation sur support époxy doit être réalisée avec un système époxy compatible.";
+  products = [
+    "Pack réparation époxy complet",
+    "Résine époxy",
+    "Durcisseur compatible",
+    "Tissu de verre",
+    "Abrasifs",
+    "Gants"
+  ];
+  warning = "Le système polyester a été exclu car le support sélectionné est en époxy.";
+}
+
 if (!categoryUrl) {
   categoryUrl = productLinks.boutique;
 }
