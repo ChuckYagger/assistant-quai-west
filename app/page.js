@@ -28,9 +28,9 @@ const productLinks = {
   // Peinture technique
   peinture: "https://boutique.quai-west-composites.fr/371-peinture-industrielle",
   peintureBrillantDirect: "https://boutique.quai-west-composites.fr/345-peintures-polyurethanes-brillant-direct",
-  peintureAuto: "https://peinture-auto.quai-west-composites.fr/370-peinture-auto",
-  peintureMoto: "https://peinture-auto.quai-west-composites.fr/371-peinture-moto",
-  peintureVehiculesIndustriels: "https://peinture-auto.quai-west-composites.fr/3821-peinture-vehicules-industriels",
+  peintureAuto: "https://shop.quaiwestpeinture.fr/370-peinture-auto",
+  peintureMoto: "https://shop.quaiwestpeinture.fr/371-peinture-moto",
+  peintureVehiculesIndustriels: "https://shop.quaiwestpeinture.fr/3821-peinture-vehicules-industriels",
   peintureKitBrillant: "https://boutique.quai-west-composites.fr/362-peinture-industrielle-brillant-en-kit",
   peintureKitMat: "https://boutique.quai-west-composites.fr/364-peinture-industrielle-mat-en-kit",
   peintureKitSatinee: "https://boutique.quai-west-composites.fr/363-peinture-industrielle-satinee-en-kit",
